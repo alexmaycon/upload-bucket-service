@@ -1,12 +1,19 @@
 package dev.alexmaycon.bucketservice.config.model;
 
+import org.springframework.validation.annotation.Validated;
+
+import javax.validation.constraints.NotEmpty;
+
+@Validated
 public class OciConfig {
 
     private String profile;
+
+    @NotEmpty(message = "'service.oci.bucket' must be informed.")
     private String bucket;
 
     public String getProfile() {
-        return profile;
+        return profile == null ? "DEFAULT" : profile;
     }
 
     public void setProfile(String profile) {

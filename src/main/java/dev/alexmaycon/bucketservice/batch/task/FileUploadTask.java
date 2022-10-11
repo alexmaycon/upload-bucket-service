@@ -34,6 +34,8 @@ public class FileUploadTask implements Tasklet, InitializingBean {
     private String bucketName;
     private String profile;
 
+    private String bucketDir;
+
     private boolean overrideFile = false;
 
     @Override
@@ -56,15 +58,21 @@ public class FileUploadTask implements Tasklet, InitializingBean {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        logger.info("Checking files in dir '" + dir.getPath() + "'...");
+        logger.info("Starting file scan in directory '{}'.", dir.getPath());
 
         if (dir.isDirectory()) {
+
+            if (bucketDir != null) {
+                logger.info("'{}' will be mapped to '{}' bucket directory.", dir.getPath(), bucketDir);
+            }
+
             Arrays.asList(dir.listFiles()).forEach(file -> {
                 logger.info("Started processing file {}.", file.getName());
                 HeadObjectResponse getObjectResponse = null;
                 boolean fileExists = false;
+                final String fullFileName = ObjectStorageComponent.getFullObjectName(bucketDir, file.getName());
                 try {
-                    getObjectResponse = objectStorageComponent.getHeadObject(objectStorage, namespace, bucketName, file.getName());
+                    getObjectResponse = objectStorageComponent.getHeadObject(objectStorage, namespace, bucketName, fullFileName);
                     fileExists = getObjectResponse.get__httpStatusCode__() == 200;
                 } catch (BmcException e) {
                     if (e.getStatusCode() == 404) {
@@ -73,12 +81,12 @@ public class FileUploadTask implements Tasklet, InitializingBean {
                 }
 
                 if (!overrideFile && fileExists) {
-                    logger.info("File {} will be ignored as the configuration does not allow file overwriting.", file.getName());
+                    logger.info("File {} will be ignored as the configuration does not allow file overwriting.", fullFileName);
                 }
 
                 if (overrideFile || !fileExists) {
                     if (overrideFile) {
-                        logger.info("File {} will be overwritten as per the configuration.", file.getName());
+                        logger.info("File {} will be overwritten as per the configuration.", fullFileName);
                     }
 
                     InputStream inputStream = null;
@@ -104,11 +112,11 @@ public class FileUploadTask implements Tasklet, InitializingBean {
                         }
 
                         if (!fileExists || (overrideFile && !md5.equals(getObjectResponse.getOpcMeta().get("file-md5")))) {
-                            final boolean res = objectStorageComponent.uploadFile(objectStorage, namespace, bucketName, file.getName(), file.length(), md5, inputStream);
+                            final boolean res = objectStorageComponent.uploadFile(objectStorage, namespace, bucketName, fullFileName, file.length(), md5, inputStream);
                             if (!res) {
-                                logger.warn("File {} was not uploaded successfully.", file.getName());
+                                logger.warn("File {} was not uploaded successfully.", fullFileName);
                             } else {
-                                logger.info("File {} uploaded successfully.", file.getName());
+                                logger.info("File {} uploaded successfully.", fullFileName);
                             }
                         }
                         try {
@@ -118,12 +126,12 @@ public class FileUploadTask implements Tasklet, InitializingBean {
                         }
                     }
                 }
-                logger.info("Finished processing file {} as {}.", file.getName(), new Date());
-
+                logger.info("Finished processing file {} as {}.", fullFileName, new Date());
             });
+            logger.info("Finishing file scan in directory '{}'.", dir.getPath());
         }
         objectStorage.close();
-        logger.info("Finishing task for file upload...");
+        logger.info("Finished task for file upload...");
         return RepeatStatus.FINISHED;
     }
 
@@ -182,5 +190,13 @@ public class FileUploadTask implements Tasklet, InitializingBean {
 
     public void setOverrideFile(boolean overrideFile) {
         this.overrideFile = overrideFile;
+    }
+
+    public String getBucketDir() {
+        return bucketDir;
+    }
+
+    public void setBucketDir(String bucketDir) {
+        this.bucketDir = bucketDir;
     }
 }

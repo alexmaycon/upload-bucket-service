@@ -1,16 +1,15 @@
 package dev.alexmaycon.bucketservice.config;
 
-import dev.alexmaycon.bucketservice.config.model.EmailNotification;
 import dev.alexmaycon.bucketservice.config.model.Service;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.stereotype.Component;
 import org.springframework.validation.annotation.Validated;
 
 @Configuration
 @PropertySource(value = {"classpath:application.properties","file:./application.properties"}, ignoreResourceNotFound = true)
-@ConfigurationProperties()
+@ConfigurationProperties
 @Validated
 public class ServiceConfiguration {
 

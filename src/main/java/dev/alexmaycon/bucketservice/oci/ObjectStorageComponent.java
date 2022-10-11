@@ -116,7 +116,7 @@ public class ObjectStorageComponent {
                         .bucketName(bucketName)
                         .objectName(directoryName.replace("/", "")
                                 .replace(FileSystems.getDefault().getSeparator(), "")
-                                .concat(FileSystems.getDefault().getSeparator())) // Talvez seja barra normal /
+                                .concat(FileSystems.getDefault().getSeparator()))
                         .contentLength(0L)
                         .putObjectBody(
                                 new ByteArrayInputStream("".getBytes(StandardCharsets.UTF_8)))
@@ -143,5 +143,12 @@ public class ObjectStorageComponent {
                 .objectName(objectName).build();
 
         return objectStorage.headObject(headObjectRequest);
+    }
+
+    public static String getFullObjectName(String dir, String objectName) {
+        final String fullObjectName = (dir == null || Strings.isEmpty(dir)
+                ? objectName
+                : dir.concat("/".concat(objectName))); //FileSystems.getDefault().getSeparator()
+        return fullObjectName;
     }
 }

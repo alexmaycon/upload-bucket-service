@@ -1,23 +1,32 @@
 package dev.alexmaycon.bucketservice.config.model;
 
-import jakarta.validation.constraints.*;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.validation.annotation.Validated;
+
+import javax.validation.constraints.*;
 import java.util.List;
 
 @Validated
 public class Service {
 
+    @NotNull
     @NotEmpty
     private List<FolderConfig> folders;
 
     @Min(1)
     @Max(10)
-    private Integer attemptsFailure = 1;
+    private Integer attemptsFailure;
 
     @NotNull
     private OciConfig oci;
 
-    private String cron = "0/10 * * * * ?";
+    @NotNull
+    @NotEmpty
+    @NotBlank
+    private String cron;
 
     public List<FolderConfig> getFolders() {
         return folders;
@@ -28,7 +37,7 @@ public class Service {
     }
 
     public Integer getAttemptsFailure() {
-        return attemptsFailure;
+        return attemptsFailure == null ? 1 : attemptsFailure;
     }
 
     public void setAttemptsFailure(Integer attemptsFailure) {
@@ -44,7 +53,7 @@ public class Service {
     }
 
     public String getCron() {
-        return cron;
+        return cron == null ? "0/10 * * * * ?" : cron;
     }
 
     public void setCron(String cron) {

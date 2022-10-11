@@ -10,20 +10,13 @@ import dev.alexmaycon.bucketservice.oci.OciAuthComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.*;
-import org.springframework.batch.core.configuration.JobRegistry;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
-import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.core.job.builder.FlowBuilder;
 import org.springframework.batch.core.job.flow.Flow;
 import org.springframework.batch.core.job.flow.support.SimpleFlow;
 import org.springframework.batch.core.launch.JobLauncher;
-import org.springframework.batch.core.launch.JobOperator;
-import org.springframework.batch.core.launch.support.SimpleJobLauncher;
-import org.springframework.batch.core.launch.support.SimpleJobOperator;
-import org.springframework.batch.core.repository.JobRepository;
-import org.springframework.batch.core.repository.support.SimpleJobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -32,7 +25,6 @@ import org.springframework.core.io.FileUrlResource;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.scheduling.TaskScheduler;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.util.Assert;
 
@@ -90,6 +82,7 @@ public class BatchUploadFiles {
         fileUploadTask.setOciAuthComponent(ociAuthComponent);
         fileUploadTask.setObjectStorageComponent(new ObjectStorageComponent(configuration));
         fileUploadTask.setOverrideFile(folderConfig.isOverwriteExistingFile());
+        fileUploadTask.setBucketDir(folderConfig.getMapToBucketDir());
 
         return stepBuilder.tasklet(fileUploadTask).build();
     }
@@ -138,9 +131,7 @@ public class BatchUploadFiles {
                     }
                 }).collect(Collectors.toList());
 
-        if (steps.isEmpty()) {
-            throw new Exception("No steps were created for the job " + JOB_NAME);
-        }
+        Assert.notEmpty(steps, "No steps were created for the job " + JOB_NAME);
 
         return steps.stream().map(step -> {
             return new FlowBuilder<SimpleFlow>("flow_".concat(step.getName()))

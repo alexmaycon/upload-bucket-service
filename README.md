@@ -9,7 +9,7 @@
     * [On-demand and service compatible](#on-demand-and-service-compatible)
     * [Multiple directories](#multiple-directories)
     * [Job scheduling](#job-scheduling)
-    * [Attemps failure](#attemps-failure)
+    * [Attempts failure](#attemps-failure)
   * [Coming soon features](#coming-soon-features)
   * [Settings](#settings)
     * [application.properties](#applicationproperties)
@@ -27,7 +27,7 @@
 
 # About
 
-The upload-bucket-service project is a automatic file¹ upload application for Buckets in the Oracle Cloud Infrastructure Object Storage (OCI) service.
+The upload-bucket-service project is an automatic file¹ upload application for Buckets in the Oracle Cloud Infrastructure Object Storage (OCI) service.
 
 With few configurations it is possible to map multiple directories² and upload to Oracle Object Storage, allowing you to configure file overwriting and scheduling.
 
@@ -90,7 +90,7 @@ Samples:
 | 0/10 * * * * ? | Execute every 10 seconds   |
 | 0 0/30 * * * ? | Execute every 30 minutes   |
 
-### Attemps failure
+### Attempts failure
 
 Allows you to set execution attempts when a failure occurs during job processing.
 
@@ -129,6 +129,7 @@ root
 | service.folders[*].cron                  | Cron expression specifies to the folder                         | No       | Value from *service.cron* | String  |
 | service.folders[*].overwriteExistingFile | Enable/disable file overwriting                                 | No       | false                     | boolean |
 | service.folders[*].enabled               | Enables/disables folder processing.                             | No       | true                      | boolean |
+| service.folders[*].mapToBucketDir        | Set the directory to use in bucket. Leave empty to use root.    | No       |                           | String  |
 
 ##  About OCI API key - .oci 
 
