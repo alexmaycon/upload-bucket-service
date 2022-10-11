@@ -13,14 +13,23 @@
     <version>0.0.2-SNAPSHOT</version>
     <name>upload-bucket-service</name>
     <description>Automating file and directory uploads to Oracle Object Storage</description>
+    <inceptionYear>2022</inceptionYear>
+    <licenses>
+        <license>
+            <name>Apache License 2.0</name>
+            <url>https://apache.org/licenses/LICENSE-2.0.html</url>
+            <distribution>manual</distribution>
+        </license>
+    </licenses>
+    <url>https://www.alexmaycon.dev</url>
+    <scm>
+        <connection>scm:git:https://github.com/alexmaycon/upload-bucket-service.git</connection>
+        <url>https://github.com/alexmaycon/upload-bucket-service</url>
+    </scm>
     <properties>
         <java.version>1.8</java.version>
     </properties>
     <dependencies>
-        <dependency>
-            <groupId>com.h2database</groupId>
-            <artifactId>h2</artifactId>
-        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-devtools</artifactId>
