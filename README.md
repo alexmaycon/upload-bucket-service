@@ -1,7 +1,6 @@
 # Files Upload Application for Buckets in Oracle Cloud Infrastructure
 
 <!-- TOC -->
-* [Files Upload Application Service for Buckets in Oracle Cloud Infrastructure](#files-upload-application-service-for-buckets-in-oracle-cloud-infrastructure)
 * [About](#about)
   * [What you will need](#what-you-will-need)
     * [Service](#service)
