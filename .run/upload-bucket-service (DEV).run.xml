@@ -1,0 +1,13 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="upload-bucket-service (DEV)" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
+    <option name="ACTIVE_PROFILES" value="dev" />
+    <envs>
+      <env name="--oci" value="C:\service\.oci" />
+    </envs>
+    <module name="upload-bucket-service" />
+    <option name="SPRING_BOOT_MAIN_CLASS" value="dev.alexmaycon.bucketservice.BucketServiceApplication" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

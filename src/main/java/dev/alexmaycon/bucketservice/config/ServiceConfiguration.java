@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.validation.annotation.Validated;
 
 @Configuration
-@PropertySource(value = "application.properties", ignoreResourceNotFound = true)
+@PropertySource(value = {"classpath:application.properties","file:./application.properties"}, ignoreResourceNotFound = true)
 @ConfigurationProperties()
 @Validated
 public class ServiceConfiguration {

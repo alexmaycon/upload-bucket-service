@@ -18,10 +18,6 @@
     </properties>
     <dependencies>
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-mail</artifactId>
-        </dependency>
-        <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
         </dependency>
@@ -72,8 +68,12 @@
         <resources>
             <resource>
                 <directory>src/main/resources</directory>
+                <includes>
+                    <include>**/application-dev.properties</include>
+                </includes>
                 <excludes>
-                    <exclude>**</exclude>
+                    <exclude>**/application.properties</exclude>
+                    <exclude>**/.oci</exclude>
                 </excludes>
             </resource>
         </resources>

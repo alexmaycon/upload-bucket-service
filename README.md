@@ -1,10 +1,9 @@
-# Files Upload Application Service for Buckets in Oracle Cloud Infrastructure
+# Files Upload Application for Buckets in Oracle Cloud Infrastructure
 
 <!-- TOC -->
+* [Files Upload Application Service for Buckets in Oracle Cloud Infrastructure](#files-upload-application-service-for-buckets-in-oracle-cloud-infrastructure)
 * [About](#about)
   * [What you will need](#what-you-will-need)
-  * [Running](#running)
-    * [On-demand](#on-demand)
     * [Service](#service)
   * [System Requirements](#system-requirements)
   * [Features](#features)
@@ -18,6 +17,10 @@
   * [About OCI API key - .oci](#about-oci-api-key---oci)
   * [Sample **.oci** file:](#sample-oci-file-)
   * [Sample application.properties file](#sample-applicationproperties-file)
+  * [Building](#building)
+    * [Running DEV profile](#running-dev-profile)
+  * [Running](#running)
+    * [On-demand](#on-demand)
   * [Code Of Conduct](#code-of-conduct)
   * [Contributing](#contributing)
   * [License](#license)
@@ -49,14 +52,6 @@ For file updates, it will only update modified files if the `service.folders[*].
 - Only that!
 
 See more details on [Settings](#settings) below.
-
-## Running
-
-### On-demand
-
-```bash
-java -jar upload-bucket-service.jar
-```
 
 ### Service
 
@@ -138,8 +133,8 @@ root
 
 ##  About OCI API key - .oci 
 
-[To create a Customer Secret key;](https://docs.oracle.com/en-us/iaas/Content/Identity/Tasks/managingcredentials.htm#create-secret-key)
-[To get the config file snippet for an API signing key.](https://docs.oracle.com/en-us/iaas/Content/Identity/Tasks/managingcredentials.htm#)
+- [To create a Customer Secret key;](https://docs.oracle.com/en-us/iaas/Content/Identity/Tasks/managingcredentials.htm#create-secret-key)
+- [To get the config file snippet for an API signing key.](https://docs.oracle.com/en-us/iaas/Content/Identity/Tasks/managingcredentials.htm#)
 
 After getting the file, rename the file to **.oci** and paste it in the same folder as the application. 
 
@@ -161,6 +156,7 @@ service.cron=0 0/30 * * * ?
 service.oci.profile=DEFAULT
 service.oci.bucket=bkp_bd
 service.folders[0].directory=C:/temp
+service.folders[0].cron=0 0/10 * * * ?
 service.folders[1].directory=C:/temp2
 service.folders[1].overwriteExistingFile=false
 service.folders[1].enabled=true
@@ -174,6 +170,39 @@ service.folders[4].directory=C:/temp4
 service.folders[4].overwriteExistingFile=false
 service.folders[4].enabled=true
 service.attemptsFailure=5
+```
+
+## Building
+
+This project was written in Java with Spring Batch and Oracle Cloud Infrastructure Client SDK.
+
+To build we use Maven.
+
+### Running DEV profile
+
+The DEV profile should be used for debugging and testing. You will need to change the value of the `--oci` property.
+
+Go to the project root directory and run:
+
+```bash
+mvn clean package install
+mvn spring-boot:run -D"spring-boot.run.profiles=dev" -D"spring-boot.run.arguments"="--oci=/path/to/.oci"
+```
+
+The project has configuration files for IntelliJ IDEA, allowing these configurations to be performed in the IDE:
+
+- Maven
+  - [clean, install]
+  - [clean, package]
+- Spring Boot
+  - upload-bucket-service (DEV)
+
+## Running
+
+### On-demand
+
+```bash
+java -jar upload-bucket-service.jar
 ```
 
 ## Code Of Conduct

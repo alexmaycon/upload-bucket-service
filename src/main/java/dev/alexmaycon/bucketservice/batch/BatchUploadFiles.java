@@ -34,6 +34,7 @@ import org.springframework.core.task.TaskExecutor;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.scheduling.support.CronTrigger;
+import org.springframework.util.Assert;
 
 import java.io.File;
 import java.io.IOException;
@@ -50,29 +51,36 @@ public class BatchUploadFiles {
 
     Map<String, ScheduledFuture<?>> jobsMap = new HashMap<>();
 
-    @Autowired
-    private JobBuilderFactory jobBuilderFactory;
+    private final JobBuilderFactory jobBuilderFactory;
 
-    @Autowired
-    private StepBuilderFactory stepBuilderFactory;
+    private final StepBuilderFactory stepBuilderFactory;
 
-    @Autowired
-    private JobUploadFileListener listener;
+    private final JobUploadFileListener listener;
 
-    @Autowired
-    private ServiceConfiguration configuration;
+    private final ServiceConfiguration configuration;
 
-    @Autowired
-    private OciAuthComponent ociAuthComponent;
+    private final OciAuthComponent ociAuthComponent;
 
-    @Autowired
-    private TaskScheduler taskScheduler;
+    private final TaskScheduler taskScheduler;
 
-    @Autowired
+    final
     JobLauncher jobLauncher;
 
-    public Step createStep(String name, FolderConfig folderConfig) throws IOException {
+    @Autowired
+    public BatchUploadFiles(JobBuilderFactory jobBuilderFactory, StepBuilderFactory stepBuilderFactory, JobUploadFileListener listener, ServiceConfiguration configuration, OciAuthComponent ociAuthComponent, TaskScheduler taskScheduler, JobLauncher jobLauncher) {
+        this.jobBuilderFactory = jobBuilderFactory;
+        this.stepBuilderFactory = stepBuilderFactory;
+        this.listener = listener;
+        this.configuration = configuration;
+        this.ociAuthComponent = ociAuthComponent;
+        this.taskScheduler = taskScheduler;
+        this.jobLauncher = jobLauncher;
 
+        Assert.notNull(this.configuration.getService(), "application.properties file was not successfully loaded.");
+        Assert.notNull(this.ociAuthComponent, ".oci file was not successfully loaded.");
+    }
+
+    public Step createStep(String name, FolderConfig folderConfig) throws IOException {
         StepBuilder stepBuilder = this.stepBuilderFactory.get(name);
 
         FileUploadTask fileUploadTask = new FileUploadTask();
@@ -91,6 +99,8 @@ public class BatchUploadFiles {
     }
 
     private boolean validateFolderConfig(FolderConfig folderConfig) {
+        Assert.notNull(folderConfig, "FolderConfig must not be null.");
+
         boolean validDir = folderConfig.isValidDirectory();
 
         if (!validDir) {
