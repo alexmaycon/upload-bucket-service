@@ -10,7 +10,7 @@
     </parent>
     <groupId>dev.alexmaycon</groupId>
     <artifactId>upload-bucket-service</artifactId>
-    <version>0.0.2-SNAPSHOT</version>
+    <version>0.0.3-SNAPSHOT</version>
     <name>upload-bucket-service</name>
     <description>Automating file and directory uploads to Oracle Object Storage</description>
     <inceptionYear>2022</inceptionYear>
