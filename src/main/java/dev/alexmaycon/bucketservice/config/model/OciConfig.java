@@ -12,6 +12,10 @@ public class OciConfig {
     @NotEmpty(message = "'service.oci.bucket' must be informed.")
     private String bucket;
 
+    private String compartmentOcid;
+
+    private boolean createBucketIfNotExists=false;
+
     public String getProfile() {
         return profile == null ? "DEFAULT" : profile;
     }
@@ -28,11 +32,29 @@ public class OciConfig {
         this.bucket = bucket;
     }
 
+    public boolean isCreateBucketIfNotExists() {
+        return createBucketIfNotExists;
+    }
+
+    public void setCreateBucketIfNotExists(boolean createBucketIfNotExists) {
+        this.createBucketIfNotExists = createBucketIfNotExists;
+    }
+
+    public String getCompartmentOcid() {
+        return compartmentOcid;
+    }
+
+    public void setCompartmentOcid(String compartmentOcid) {
+        this.compartmentOcid = compartmentOcid;
+    }
+
     @Override
     public String toString() {
         return "OciConfig{" +
                 "profile='" + profile + '\'' +
                 ", bucket='" + bucket + '\'' +
+                ", compartmentId='" + compartmentOcid + '\'' +
+                ", createBucketIfNotExists=" + createBucketIfNotExists +
                 '}';
     }
 }

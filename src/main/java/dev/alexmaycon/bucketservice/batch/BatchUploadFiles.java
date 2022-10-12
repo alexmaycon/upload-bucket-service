@@ -5,6 +5,7 @@ import dev.alexmaycon.bucketservice.batch.runnable.RunnableJob;
 import dev.alexmaycon.bucketservice.batch.task.FileUploadTask;
 import dev.alexmaycon.bucketservice.config.ServiceConfiguration;
 import dev.alexmaycon.bucketservice.config.model.FolderConfig;
+import dev.alexmaycon.bucketservice.config.model.OciConfig;
 import dev.alexmaycon.bucketservice.oci.ObjectStorageComponent;
 import dev.alexmaycon.bucketservice.oci.OciAuthComponent;
 import org.slf4j.Logger;
@@ -75,20 +76,26 @@ public class BatchUploadFiles {
     public Step createStep(String name, FolderConfig folderConfig) throws IOException {
         StepBuilder stepBuilder = this.stepBuilderFactory.get(name);
 
+        final OciConfig oci = folderConfig.getOci() == null ? configuration.getService().getOci() : folderConfig.getOci();
+
         FileUploadTask fileUploadTask = new FileUploadTask();
         fileUploadTask.setDirectory(new FileUrlResource(folderConfig.getDirectory()));
-        fileUploadTask.setBucketName(configuration.getService().getOci().getBucket());
-        fileUploadTask.setProfile(configuration.getService().getOci().getProfile());
+
+        fileUploadTask.setBucketName(oci.getBucket());
+        fileUploadTask.setProfile(oci.getProfile());
+        fileUploadTask.setCompartmentOcid(oci.getCompartmentOcid());
+        fileUploadTask.setCreateBucketIfNotExists(oci.isCreateBucketIfNotExists());
+
         fileUploadTask.setOciAuthComponent(ociAuthComponent);
         fileUploadTask.setObjectStorageComponent(new ObjectStorageComponent(configuration));
         fileUploadTask.setOverrideFile(folderConfig.isOverwriteExistingFile());
         fileUploadTask.setBucketDir(folderConfig.getMapToBucketDir());
 
-        return stepBuilder.tasklet(fileUploadTask).build();
+        return stepBuilder.tasklet(fileUploadTask).throttleLimit(1).build();
     }
 
     public Flow splitFlow(List<Flow> flows) {
-        return new FlowBuilder<SimpleFlow>("split_flow").split(taskExecutor()).add(flows.toArray(new Flow[0])).build();
+        return new FlowBuilder<SimpleFlow>("split_flow").split(taskExecutor()).add(flows.toArray(new Flow[0])).end();
     }
 
     private boolean validateFolderConfig(FolderConfig folderConfig) {
@@ -119,6 +126,11 @@ public class BatchUploadFiles {
         final List<FolderConfig> listCleared = new ArrayList<>(
                 new LinkedHashSet<>(new ArrayList<>(configuration.getService().getFolders())));
 
+        Assert.isTrue(!(listCleared.stream()
+                        .filter(folderConfig -> validateDefaultFolderConfig(folderConfig)).count() == 0 && listCleared.stream()
+                        .filter(folderConfig -> validateCustomCronFolderConfig(folderConfig)).count() > 0),
+                "At least one directory must use the default cron configuration 'service.cron' and its property 'service.folders[*].cron' must not be informed.");
+
         List<Step> steps = listCleared.stream()
                 .filter(folderConfig -> validateDefaultFolderConfig(folderConfig))
                 .map(dir -> {
@@ -135,7 +147,7 @@ public class BatchUploadFiles {
 
         return steps.stream().map(step -> {
             return new FlowBuilder<SimpleFlow>("flow_".concat(step.getName()))
-                    .start(step).build();
+                    .start(step).end();
         }).collect(Collectors.toList());
     }
 
@@ -188,7 +200,9 @@ public class BatchUploadFiles {
 
     @Bean
     public TaskExecutor taskExecutor() {
-        return new SimpleAsyncTaskExecutor("batch_upload_files");
+        SimpleAsyncTaskExecutor taskExecutor = new SimpleAsyncTaskExecutor("batch_upload_files");
+        taskExecutor.setConcurrencyLimit(2);
+        return taskExecutor;
     }
 
 

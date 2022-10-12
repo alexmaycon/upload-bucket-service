@@ -27,6 +27,8 @@ public class FolderConfig {
     @Pattern(regexp = "^[a-zA-Z0-9_-]*$", message="'service.folders[*].mapToBucketDir' must contain only letters, numbers, hyphen and underscore") //
     private String mapToBucketDir;
 
+    private OciConfig oci;
+
     public String getDirectory() {
         return directory;
     }
@@ -67,6 +69,14 @@ public class FolderConfig {
         this.mapToBucketDir = mapToBucketDir;
     }
 
+    public OciConfig getOci() {
+        return oci;
+    }
+
+    public void setOci(OciConfig oci) {
+        this.oci = oci;
+    }
+
     @Override
     public String toString() {
         return "FolderConfig{" +
@@ -75,6 +85,7 @@ public class FolderConfig {
                 ", cron='" + cron + '\'' +
                 ", overwriteExistingFile=" + overwriteExistingFile +
                 ", mapToBucketDir='" + mapToBucketDir + '\'' +
+                ", oci=" + oci +
                 '}';
     }
 

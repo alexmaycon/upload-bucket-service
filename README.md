@@ -8,8 +8,9 @@
   * [Features](#features)
     * [On-demand and service compatible](#on-demand-and-service-compatible)
     * [Multiple directories](#multiple-directories)
+    * [Multiple buckets](#multiple-buckets)
     * [Job scheduling](#job-scheduling)
-    * [Attempts failure](#attemps-failure)
+    * [Attempts failure](#attempts-failure)
   * [Coming soon features](#coming-soon-features)
   * [Settings](#settings)
     * [application.properties](#applicationproperties)
@@ -48,7 +49,7 @@ For file updates, it will only update modified files if the `service.folders[*].
 
 - OCI Client API key file and key file - see more details on [About OCI API key - .oci](#about-oci-api-key---oci);
 - Configure directories in application.properties file;
-- Only that!
+- **Only that!**
 
 See more details on [Settings](#settings) below.
 
@@ -77,6 +78,18 @@ The application can be run on demand or configured as a service on Windows and L
 The application allows the configuration of one or more directories, in which it is possible to enable or disable it and enable the overwriting of files.
 Directory analysis is performed in parallel by multiple threads and asynchronously, thus ensuring better performance and without spending resources for a long time.
 
+### Multiple buckets
+
+You can choose to send to the global bucket or to a different bucket per directory.
+
+- `service.oci.bucket` for global configuration;
+- `service.folders[*].oci.bucket` for specific folder.
+
+If the bucket does not exist, use the 'createBucketIfNotExists' option to create a new bucket.
+
+- `service.oci.createBucketIfNotExists` for global configuration;
+- `service.folders[*].oci.createBucketIfNotExists=true` for a specific folder.
+
 ### Job scheduling
 
 The application uses Cron expression notation, in which it is possible to specify an interval or time for the execution of the job. You can set a default value for all jobs (`service.cron`) or set specific values for each folder (`service.folders[*].cron`).
@@ -99,7 +112,6 @@ Allows you to set execution attempts when a failure occurs during job processing
 Some features that are being planned to be added:
 
 - Sending notification of the job result by e-mail;
-- Support for sending to multiple buckets.
   
 If you have a suggestion, feel free to open a new issue.
 
@@ -116,20 +128,24 @@ root
 
 ### application.properties
 
-**Attention:** You must have at least one directory using the global `service.cron` or you will get the exception `No steps were created for the job`.
+**Attention:** You must have at least one directory using the global `service.cron`.
 
-| Property                                 | Description                                                     | Required | Default Value             | Type    |
-|------------------------------------------|-----------------------------------------------------------------|----------|---------------------------|---------|
-| service.cron                             | Default cron expression to all jobs execution                   | No       | "0/10 * * * * ?"          | String  |
-| service.attemptsFailure                  | Number of attempts when a failure occurs                        | No       | 1                         | int     |
-| service.oci.profile                      | Profile session of .oci configuration                           | Yes      | "DEFAULT"                 | String  |
-| service.oci.bucket                       | OCI Bucket name                                                 | Yes      |                           | String  |
-| service.folders[*]                       | Folders configuration                                           | Yes      |                           | List    |
-| service.folders[*].directory             | Folder path (need to include escape character for \ on Windows) | Yes      |                           | String  |
-| service.folders[*].cron                  | Cron expression specifies to the folder                         | No       | Value from *service.cron* | String  |
-| service.folders[*].overwriteExistingFile | Enable/disable file overwriting                                 | No       | false                     | boolean |
-| service.folders[*].enabled               | Enables/disables folder processing.                             | No       | true                      | boolean |
-| service.folders[*].mapToBucketDir        | Set the directory to use in bucket. Leave empty to use root.    | No       |                           | String  |
+| Property                                 | Description                                                                                             | Required | Default Value             | Type    |
+|------------------------------------------|---------------------------------------------------------------------------------------------------------|----------|---------------------------|---------|
+| service.cron                             | Default cron expression to all jobs execution                                                           | No       | "0/10 * * * * ?"          | String  |
+| service.attemptsFailure                  | Number of attempts when a failure occurs                                                                | No       | 1                         | int     |
+| service.oci.profile                      | Profile session of .oci configuration                                                                   | Yes      | "DEFAULT"                 | String  |
+| service.oci.bucket                       | OCI Bucket name                                                                                         | Yes      |                           | String  |
+| service.oci.compartmentOcid              | Compartment OCID - if you wanted to create the bucket in a specific compartment.                        | No       |                           | String  |
+| service.folders[*]                       | Folders configuration                                                                                   | Yes      |                           | List    |
+| service.folders[*].directory             | Folder path (need to include escape character for \ on Windows)                                         | Yes      |                           | String  |
+| service.folders[*].cron                  | Cron expression specifies to the folder                                                                 | No       | Value from *service.cron* | String  |
+| service.folders[*].overwriteExistingFile | Enable/disable file overwriting                                                                         | No       | false                     | boolean |
+| service.folders[*].enabled               | Enables/disables folder processing.                                                                     | No       | true                      | boolean |
+| service.folders[*].mapToBucketDir        | Set the directory to use in bucket. Leave empty to use root.                                            | No       |                           | String  |
+| service.folders[*].profile               | Profile session of .oci configuration (apply only to folder)                                            | No       | "DEFAULT"                 | String  |
+| service.folders[*].bucket                | OCI Bucket name (apply only to folder)                                                                  | No       |                           | String  |
+| service.folders[*].compartmentOcid       | Compartment OCID - if you wanted to create the bucket in a specific compartment. (apply only to folder) | No       |                           | String  |
 
 ##  About OCI API key - .oci 
 

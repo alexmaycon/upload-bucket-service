@@ -7,6 +7,7 @@ import com.oracle.bmc.model.BmcException;
 import com.oracle.bmc.objectstorage.ObjectStorage;
 import com.oracle.bmc.objectstorage.ObjectStorageClient;
 import com.oracle.bmc.objectstorage.model.Bucket;
+import com.oracle.bmc.objectstorage.model.CreateBucketDetails;
 import com.oracle.bmc.objectstorage.model.ListObjects;
 import com.oracle.bmc.objectstorage.requests.*;
 import com.oracle.bmc.objectstorage.responses.*;
@@ -44,13 +45,11 @@ public class ObjectStorageComponent {
 
     public final ObjectStorage getObjectStorage(ConfigFileReader.ConfigFile configFile, AuthenticationDetailsProvider provider) throws Exception {
         ObjectStorage client = new ObjectStorageClient(provider);
-
         String regionId = configFile.get("region");
         if (regionId == null || Strings.isEmpty(regionId)) {
             // TODO: Criar exceção personalizada
             throw new Exception("Region not informed in the configuration file.");
         }
-
         client.setRegion(Region.fromRegionId(regionId));
         return client;
     }
@@ -60,8 +59,40 @@ public class ObjectStorageComponent {
         return response.getValue();
     }
 
-    public Bucket getBucket(ObjectStorage objectStorage, String bucketName) {
-        return objectStorage.getBucket(GetBucketRequest.builder().retryConfiguration(retryConfiguration()).bucketName(bucketName).build()).getBucket();
+    public Bucket getBucket(ObjectStorage objectStorage, String namespace, String bucketName) {
+        return objectStorage.getBucket(GetBucketRequest.builder()
+                .retryConfiguration(retryConfiguration())
+                .namespaceName(namespace)
+                .bucketName(bucketName).build()).getBucket();
+    }
+
+    public HeadBucketResponse getHeadBucket(ObjectStorage objectStorage, String namespace,  String bucketName){
+        HeadBucketRequest headBucketRequest = HeadBucketRequest.builder()
+                .retryConfiguration(retryConfiguration())
+                .namespaceName(namespace)
+                .bucketName(bucketName)
+                .build();
+
+        return objectStorage.headBucket(headBucketRequest);
+    }
+
+    public boolean createBucket(ObjectStorage objectStorage, String compartmentId, String namespace, String bucketName) throws Exception {
+        CreateBucketDetails createBucketDetails = CreateBucketDetails.builder()
+                .compartmentId(compartmentId)
+                .name(bucketName)
+                .publicAccessType(CreateBucketDetails.PublicAccessType.NoPublicAccess)
+                .storageTier(CreateBucketDetails.StorageTier.Standard)
+                .objectEventsEnabled(false)
+                .versioning(CreateBucketDetails.Versioning.Disabled)
+                .autoTiering(Bucket.AutoTiering.Disabled).build();
+
+        CreateBucketRequest createBucketRequest = CreateBucketRequest.builder()
+                .namespaceName(namespace)
+                .createBucketDetails(createBucketDetails)
+                .build();
+
+        CreateBucketResponse response = objectStorage.createBucket(createBucketRequest);
+        return response.get__httpStatusCode__() == 200;
     }
 
     public ListObjects getObjects(ObjectStorage objectStorage, String namespace, String bucketName) throws BmcException {
