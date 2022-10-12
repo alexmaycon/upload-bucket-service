@@ -11,6 +11,7 @@
     * [Multiple buckets](#multiple-buckets)
     * [Job scheduling](#job-scheduling)
     * [Attempts failure](#attempts-failure)
+    * [Webhook notification](#webhook-notification)
   * [Coming soon features](#coming-soon-features)
   * [Settings](#settings)
     * [application.properties](#applicationproperties)
