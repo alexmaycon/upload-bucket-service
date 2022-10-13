@@ -11,6 +11,7 @@
     * [Multiple buckets](#multiple-buckets)
     * [Job scheduling](#job-scheduling)
     * [Attempts failure](#attempts-failure)
+    * [Webhook notification](#webhook-notification)
   * [Coming soon features](#coming-soon-features)
   * [Settings](#settings)
     * [application.properties](#applicationproperties)
@@ -107,6 +108,58 @@ Samples:
 
 Allows you to set execution attempts when a failure occurs during job processing.
 
+### Webhook notification
+
+You can configure an API URL that you will be **notified** when the job finishes running (either to failure or success). The API must accept the POST method.
+
+The body can be JSON or XML, just configure the `service.hookContentType` with one of the values:
+
+- `application/json`
+- `application/xml`
+
+Sample success POST:
+
+```json
+{
+	"jobName": "DEFAULT_CRON_JOB",
+	"jobStatus": "COMPLETED",
+	"createdTime": "2022-10-12T22:26:05+0000",
+	"endTime": "2022-10-12T22:26:08+0000",
+	"exceptions": []
+}
+```
+
+Sample error POST:
+
+```json
+{
+  "jobName": "DEFAULT_CRON_JOB",
+  "jobStatus": "FAILED",
+  "createdTime": "2022-10-12T22:57:54+0000",
+  "endTime": "2022-10-12T22:57:57+0000",
+  "exceptions": [
+    {
+      "cause": null,
+      "stackTrace": [
+        {
+          "classLoaderName": null,
+          "moduleName": null,
+          "moduleVersion": null,
+          "methodName": "lambda$parseJobExecution$0",
+          "fileName": "Hook.java",
+          "lineNumber": 68,
+          "className": "dev.alexmaycon.bucketservice.hook.model.Hook",
+          "nativeMethod": false
+        }
+      ],
+      "message": "It's a test!!!!",
+      "suppressed": [],
+      "localizedMessage": "It's a test!!!!"
+    }
+  ]
+}
+```
+
 ## Coming soon features
 
 Some features that are being planned to be added:
@@ -133,6 +186,8 @@ root
 | Property                                 | Description                                                                                             | Required | Default Value             | Type    |
 |------------------------------------------|---------------------------------------------------------------------------------------------------------|----------|---------------------------|---------|
 | service.cron                             | Default cron expression to all jobs execution                                                           | No       | "0/10 * * * * ?"          | String  |
+| service.hook                             | API endpoint URL at which to be notified (POST) at the end of the JOB execution.                        | No       |                           | String  |
+| service.hookContentType                  | Media type (json/xml)                                                                                   | No       | "application/json"        | String  |
 | service.attemptsFailure                  | Number of attempts when a failure occurs                                                                | No       | 1                         | int     |
 | service.oci.profile                      | Profile session of .oci configuration                                                                   | Yes      | "DEFAULT"                 | String  |
 | service.oci.bucket                       | OCI Bucket name                                                                                         | Yes      |                           | String  |

@@ -97,6 +97,8 @@ public class FileUploadTask implements Tasklet, InitializingBean {
                         logger.info("File {} will be overwritten as per the configuration.", fullFileName);
                     }
 
+
+
                     InputStream inputStream = null;
                     try {
                         inputStream = new FileInputStream(file);
@@ -139,6 +141,7 @@ public class FileUploadTask implements Tasklet, InitializingBean {
             logger.info("Finishing file scan in directory '{}'.", dir.getPath());
         }
         objectStorage.close();
+
         logger.info("Finished task for file upload...");
         return RepeatStatus.FINISHED;
     }
