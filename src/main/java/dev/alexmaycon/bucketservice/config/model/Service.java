@@ -29,7 +29,7 @@ public class Service {
     @NotBlank
     private String cron;
 
-    @Pattern(regexp = "^[(http(s)?):\\/\\/(www\\.)?a-zA-Z0-9@:%._\\+~#=]{2,256}\\.[a-z]{2,6}\\b([-a-zA-Z0-9@:%_\\+.~#?&//=]*)$", message = "'service.hook' must me a valid URL.")
+    @Pattern(regexp = "^(?:^|[ \\t])((https?:\\/\\/)?(?:localhost|[\\w-]+(?:\\.[\\w-]+)+)(:\\d+)?(\\/\\S*)?)$", message = "'service.hook' must me a valid URL.")
     private String hook;
 
     private String hookContentType = MediaType.APPLICATION_JSON;
