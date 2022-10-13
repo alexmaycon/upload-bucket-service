@@ -187,7 +187,7 @@ root
 |------------------------------------------|---------------------------------------------------------------------------------------------------------|----------|---------------------------|---------|
 | service.cron                             | Default cron expression to all jobs execution                                                           | No       | "0/10 * * * * ?"          | String  |
 | service.hook                             | API endpoint URL at which to be notified (POST) at the end of the JOB execution.                        | No       |                           | String  |
-| service.hookContentType                  | Media type (json/xml)                                                                                   |          | "application/json"        | String  |
+| service.hookContentType                  | Media type (json/xml)                                                                                   | No       | "application/json"        | String  |
 | service.attemptsFailure                  | Number of attempts when a failure occurs                                                                | No       | 1                         | int     |
 | service.oci.profile                      | Profile session of .oci configuration                                                                   | Yes      | "DEFAULT"                 | String  |
 | service.oci.bucket                       | OCI Bucket name                                                                                         | Yes      |                           | String  |

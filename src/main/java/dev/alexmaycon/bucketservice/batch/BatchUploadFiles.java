@@ -19,7 +19,6 @@ import org.springframework.batch.core.job.flow.Flow;
 import org.springframework.batch.core.job.flow.support.SimpleFlow;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.step.builder.StepBuilder;
-import org.springframework.batch.repeat.exception.DefaultExceptionHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -40,7 +39,7 @@ import java.util.stream.Collectors;
 @EnableBatchProcessing
 public class BatchUploadFiles {
 
-    private static Logger logger = LoggerFactory.getLogger(BatchUploadFiles.class);
+    private final static Logger logger = LoggerFactory.getLogger(BatchUploadFiles.class);
     private static final String JOB_NAME = "DEFAULT_CRON_JOB";
 
     Map<String, ScheduledFuture<?>> jobsMap = new HashMap<>();
@@ -125,22 +124,22 @@ public class BatchUploadFiles {
         return validateFolderConfig(folderConfig) && folderConfig.getCron() != null;
     }
 
-    public List<Flow> flows() throws Exception {
+    public List<Flow> flows() {
         final List<FolderConfig> listCleared = new ArrayList<>(
                 new LinkedHashSet<>(new ArrayList<>(configuration.getService().getFolders())));
 
         Assert.isTrue(!(listCleared.stream()
-                        .filter(folderConfig -> validateDefaultFolderConfig(folderConfig)).count() == 0 && listCleared.stream()
-                        .filter(folderConfig -> validateCustomCronFolderConfig(folderConfig)).count() > 0),
+                        .filter(this::validateDefaultFolderConfig).count() == 0 && listCleared.stream()
+                        .filter(this::validateCustomCronFolderConfig).count() > 0),
                 "At least one directory must use the default cron configuration 'service.cron' and its property 'service.folders[*].cron' must not be informed.");
 
         List<Step> steps = listCleared.stream()
-                .filter(folderConfig -> validateDefaultFolderConfig(folderConfig))
+                .filter(this::validateDefaultFolderConfig)
                 .map(dir -> {
                     File file = new File(dir.getDirectory());
                     try {
                         logger.info("Creating step to folder config \"{}\".", file.getPath());
-                        return createStep("step_".concat(file.getName()).concat("_" + UUID.randomUUID().toString()), dir);
+                        return createStep("step_".concat(file.getName()).concat("_" + UUID.randomUUID()), dir);
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }
@@ -148,26 +147,27 @@ public class BatchUploadFiles {
 
         Assert.notEmpty(steps, "No steps were created for the job " + JOB_NAME);
 
-        return steps.stream().map(step -> {
-            return new FlowBuilder<SimpleFlow>("flow_".concat(step.getName()))
-                    .start(step).end();
-        }).collect(Collectors.toList());
+        return steps.stream()
+                .map(step -> new FlowBuilder<SimpleFlow>("flow_".concat(step.getName()))
+                .start(step)
+                .end())
+                .collect(Collectors.toList());
     }
 
 
     @Bean
-    public Job job() throws Exception {
+    public Job job() {
         logger.info("Creating job {} with default cron {}.", JOB_NAME, configuration.getService().getCron());
         return this.jobBuilderFactory.get(JOB_NAME).listener(listener).start(splitFlow(flows())).end().build();
     }
 
     @Bean
-    public void createSeperatedCronJobs() throws Exception {
+    public void createSeperatedCronJobs() {
         final List<FolderConfig> listCleared = new ArrayList<>(
                 new LinkedHashSet<>(new ArrayList<>(configuration.getService().getFolders())));
 
         listCleared.stream()
-                .filter(folderConfig -> validateCustomCronFolderConfig(folderConfig))
+                .filter(this::validateCustomCronFolderConfig)
                 .forEach(dir -> {
                     File file = new File(dir.getDirectory());
                     try {

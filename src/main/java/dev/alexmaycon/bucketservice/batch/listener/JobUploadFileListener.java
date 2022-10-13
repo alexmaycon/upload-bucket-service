@@ -17,8 +17,12 @@ public class JobUploadFileListener extends JobExecutionListenerSupport {
 
     private static final Logger logger = LoggerFactory.getLogger(JobUploadFileListener.class);
 
+    private final HookClientRequest hookClientRequest;
+
     @Autowired
-    private HookClientRequest hookClientRequest;
+    public JobUploadFileListener(HookClientRequest hookClientRequest) {
+        this.hookClientRequest = hookClientRequest;
+    }
 
     public void sendHook(JobExecution jobExecution){
         hookClientRequest.send(jobExecution);

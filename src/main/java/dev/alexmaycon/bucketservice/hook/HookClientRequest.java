@@ -26,29 +26,32 @@ public class HookClientRequest {
     }
 
     public void send(JobExecution jobExecution) {
+        try {
+            final String hook = serviceConfiguration.getService().getHook();
 
-        final String hook = serviceConfiguration.getService().getHook();
+            if (hook == null)
+                return;
 
-        if (hook == null)
-            return;
+            final String contentType = serviceConfiguration.getService().getHookContentType();
 
-        final String contentType = serviceConfiguration.getService().getHookContentType();
+            ClientConfig config = new ClientConfig();
 
-        ClientConfig config = new ClientConfig();
+            Client client = ClientBuilder.newClient(config);
 
-        Client client = ClientBuilder.newClient(config);
+            WebTarget target = client.target(hook);
 
-        WebTarget target = client.target(hook);
+            Response response = target
+                    .request()
+                    .accept(contentType)
+                    .post(Entity.entity(Hook.parseJobExecution(jobExecution), contentType), Response.class);
 
-        Response response = target
-                .request()
-                .accept(contentType)
-                .post(Entity.entity(Hook.parseJobExecution(jobExecution),contentType), Response.class);
-
-        if (response.getStatus() == 200) {
-            logger.info("Job {} hook notification as sent successfully.", jobExecution.getJobInstance().getJobName());
-        } else {
-            logger.info("Error {} on send job {} hook notification: Response: {}", response.getStatus(), jobExecution.getJobInstance().getJobName(), response.readEntity(String.class));
+            if (response.getStatus() == 200) {
+                logger.info("Job {} hook notification as sent successfully.", jobExecution.getJobInstance().getJobName());
+            } else {
+                logger.warn("Error {} on send job {} hook notification: Response: {}", response.getStatus(), jobExecution.getJobInstance().getJobName(), response.readEntity(String.class));
+            }
+        }   catch (Exception e) {
+            logger.error("Error on send job {} hook notification: Error: {}", jobExecution.getJobInstance().getJobName(), e.getMessage());
         }
 
     }
