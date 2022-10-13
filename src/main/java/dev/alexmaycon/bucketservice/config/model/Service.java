@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.validation.annotation.Validated;
 
 import javax.validation.constraints.*;
+import javax.ws.rs.core.MediaType;
 import java.util.List;
 
 @Validated
@@ -27,6 +28,11 @@ public class Service {
     @NotEmpty
     @NotBlank
     private String cron;
+
+    @Pattern(regexp = "^[(http(s)?):\\/\\/(www\\.)?a-zA-Z0-9@:%._\\+~#=]{2,256}\\.[a-z]{2,6}\\b([-a-zA-Z0-9@:%_\\+.~#?&//=]*)$", message = "'service.hook' must me a valid URL.")
+    private String hook;
+
+    private String hookContentType = MediaType.APPLICATION_JSON;
 
     public List<FolderConfig> getFolders() {
         return folders;
@@ -58,6 +64,22 @@ public class Service {
 
     public void setCron(String cron) {
         this.cron = cron;
+    }
+
+    public String getHook() {
+        return hook;
+    }
+
+    public void setHook(String hook) {
+        this.hook = hook;
+    }
+
+    public String getHookContentType() {
+        return hookContentType;
+    }
+
+    public void setHookContentType(String hookContentType) {
+        this.hookContentType = hookContentType;
     }
 
     @Override
