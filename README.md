@@ -31,15 +31,16 @@
 
 The upload-bucket-service project is an automatic file¹ upload application for Buckets in the Oracle Cloud Infrastructure Object Storage (OCI) service.
 
-With few configurations it is possible to map multiple directories² and upload to Oracle Object Storage, allowing you to configure file overwriting and scheduling.
+With few configurations it is possible to map multiple directories² and upload to Oracle Object Storage, allowing you to configure file overwriting, scheduling and webhook notification.
 
 You will be able to:
 
 - Upload files from multiple directories;
 - Assist in the migration of extensive data;
 - Save and replicate backup files in a secure and automated way.
+- Configure webhooks to receive notification of each run with job status and details.
 
-**Caution:** the application does not sync deleted files, that is, it does not delete the file in the Bucket, as the intention is to provide a secure way of syncing files, especially for backups.
+**Caution:** this app does not sync deleted files, that is, it does not delete the file in the Bucket, as the intention is to provide a secure way of syncing files, especially for backups.
 For file updates, it will only update modified files if the `service.folders[*].overwriteExistingFile` parameter is `true`.
 
 **Note 1:** *file size limit is 50GB.*
@@ -110,27 +111,29 @@ Allows you to set execution attempts when a failure occurs during job processing
 
 ### Webhook notification
 
-You can configure an API URL that you will be **notified** when the job finishes running (either to failure or success). The API must accept the POST method.
+You can configure an API URL that you will be **notified** when the job finishes running (either to failure or success). **Your API must accept the POST method.**
 
 The body can be JSON or XML, just configure the `service.hookContentType` with one of the values:
 
 - `application/json`
 - `application/xml`
 
-Sample success POST:
+**Sample JSON success:**
+
+On `details` field, each directory is separated by the '¢' character and the directory properties are separated by the ';' character.
 
 ```json
 {
 	"jobName": "DEFAULT_CRON_JOB",
 	"jobStatus": "COMPLETED",
-    "details": "DIRECTORY=C:/temp;CRON=0/10 * * * * ?;BUCKET=teste",
+	"details": "DIRECTORY=C:/temp;CRON=0/10 * * * * ?;BUCKET=teste¢DIRECTORY=C:/temp2;CRON=0/10 * * * * ?;BUCKET=teste",
 	"createdTime": "2022-10-12T22:26:05+0000",
 	"endTime": "2022-10-12T22:26:08+0000",
 	"exceptions": []
 }
 ```
 
-Sample error POST:
+**Sample JSON error:**
 
 ```json
 {
@@ -162,14 +165,6 @@ Sample error POST:
 }
 ```
 
-## Coming soon features
-
-Some features that are being planned to be added:
-
-- Sending notification of the job result by e-mail;
-  
-If you have a suggestion, feel free to open a new issue.
-
 ## Settings
 
 Installation folder structure:
@@ -191,11 +186,11 @@ root
 | service.hook                             | API endpoint URL at which to be notified (POST) at the end of the JOB execution.                        | No       |                           | String  |
 | service.hookContentType                  | Media type (json/xml)                                                                                   | No       | "application/json"        | String  |
 | service.attemptsFailure                  | Number of attempts when a failure occurs                                                                | No       | 1                         | int     |
-| service.oci.profile                      | Profile session of .oci configuration                                                                   | Yes      | "DEFAULT"                 | String  |
-| service.oci.bucket                       | OCI Bucket name                                                                                         | Yes      |                           | String  |
+| service.oci.profile                      | Profile session of .oci configuration                                                                   | No       | "DEFAULT"                 | String  |
+| service.oci.bucket                       | OCI Bucket name                                                                                         | **Yes**  |                           | String  |
 | service.oci.compartmentOcid              | Compartment OCID - if you wanted to create the bucket in a specific compartment.                        | No       |                           | String  |
-| service.folders[*]                       | Folders configuration                                                                                   | Yes      |                           | List    |
-| service.folders[*].directory             | Folder path (need to include escape character for \ on Windows)                                         | Yes      |                           | String  |
+| service.folders[*]                       | Folders configuration                                                                                   | **Yes**  |                           | List    |
+| service.folders[*].directory             | Folder path (need to include escape character for \ on Windows)                                         | **Yes**  |                           | String  |
 | service.folders[*].cron                  | Cron expression specifies to the folder                                                                 | No       | Value from *service.cron* | String  |
 | service.folders[*].overwriteExistingFile | Enable/disable file overwriting                                                                         | No       | false                     | boolean |
 | service.folders[*].enabled               | Enables/disables folder processing.                                                                     | No       | true                      | boolean |

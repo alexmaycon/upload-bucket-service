@@ -21,7 +21,7 @@ public class JobConfig {
 
     public void put(String key, String value){
         if (directoriesPerJobConfig.containsKey(key)) {
-            directoriesPerJobConfig.merge(key, value, (oldValue, newValue) -> oldValue+"/"+newValue);
+            directoriesPerJobConfig.merge(key, value, (oldValue, newValue) -> oldValue+"¢"+newValue);
         } else {
             directoriesPerJobConfig.put(key, value);
         }
