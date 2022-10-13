@@ -123,6 +123,7 @@ Sample success POST:
 {
 	"jobName": "DEFAULT_CRON_JOB",
 	"jobStatus": "COMPLETED",
+    "details": "DIRECTORY=C:/temp;CRON=0/10 * * * * ?;BUCKET=teste",
 	"createdTime": "2022-10-12T22:26:05+0000",
 	"endTime": "2022-10-12T22:26:08+0000",
 	"exceptions": []
@@ -135,6 +136,7 @@ Sample error POST:
 {
   "jobName": "DEFAULT_CRON_JOB",
   "jobStatus": "FAILED",
+  "details": "DIRECTORY=C:/temp;CRON=0/10 * * * * ?;BUCKET=teste",
   "createdTime": "2022-10-12T22:57:54+0000",
   "endTime": "2022-10-12T22:57:57+0000",
   "exceptions": [

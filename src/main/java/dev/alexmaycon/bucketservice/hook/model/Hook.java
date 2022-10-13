@@ -13,6 +13,7 @@ public class Hook implements Serializable {
 
     private String jobName;
     private String jobStatus;
+    private String details;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssZ", timezone = "GMT")
     private Date createdTime;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssZ", timezone = "GMT")
@@ -59,10 +60,19 @@ public class Hook implements Serializable {
         this.exceptions = exceptions;
     }
 
-    public static Hook parseJobExecution(JobExecution jobExecution) {
+    public String getDetails() {
+        return details;
+    }
+
+    public void setDetails(String details) {
+        this.details = details;
+    }
+
+    public static Hook parseJobExecution(JobExecution jobExecution, String details) {
         Hook hook = new Hook();
         hook.setJobName(jobExecution.getJobInstance().getJobName());
         hook.setJobStatus(jobExecution.getStatus().toString());
+        hook.setDetails(details);
         hook.setCreatedTime(jobExecution.getCreateTime());
         hook.setEndTime(jobExecution.getEndTime());
         hook.setExceptions(jobExecution.getAllFailureExceptions().stream().map(throwable -> new Exception(throwable.getMessage())).collect(Collectors.toList()));
