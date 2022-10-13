@@ -18,6 +18,7 @@ import dev.alexmaycon.bucketservice.config.ServiceConfiguration;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -47,7 +48,6 @@ public class ObjectStorageComponent {
         ObjectStorage client = new ObjectStorageClient(provider);
         String regionId = configFile.get("region");
         if (regionId == null || Strings.isEmpty(regionId)) {
-            // TODO: Criar exceção personalizada
             throw new Exception("Region not informed in the configuration file.");
         }
         client.setRegion(Region.fromRegionId(regionId));
@@ -66,7 +66,7 @@ public class ObjectStorageComponent {
                 .bucketName(bucketName).build()).getBucket();
     }
 
-    public HeadBucketResponse getHeadBucket(ObjectStorage objectStorage, String namespace,  String bucketName){
+    public HeadBucketResponse getHeadBucket(ObjectStorage objectStorage, String namespace, String bucketName) {
         HeadBucketRequest headBucketRequest = HeadBucketRequest.builder()
                 .retryConfiguration(retryConfiguration())
                 .namespaceName(namespace)
@@ -76,7 +76,7 @@ public class ObjectStorageComponent {
         return objectStorage.headBucket(headBucketRequest);
     }
 
-    public boolean createBucket(ObjectStorage objectStorage, String compartmentId, String namespace, String bucketName) throws Exception {
+    public boolean createBucket(ObjectStorage objectStorage, String compartmentId, String namespace, String bucketName) throws BmcException {
         CreateBucketDetails createBucketDetails = CreateBucketDetails.builder()
                 .compartmentId(compartmentId)
                 .name(bucketName)
@@ -122,7 +122,7 @@ public class ObjectStorageComponent {
 
     public boolean uploadFile(ObjectStorage objectStorage, String namespaceName, String bucketName, String objectName, Long length, String md5, InputStream objectBody) {
         HashMap<String, String> opcMeta = new HashMap<>();
-        opcMeta.put("file-md5",md5);
+        opcMeta.put("file-md5", md5);
 
         PutObjectRequest putObjectRequest =
                 PutObjectRequest.builder()
@@ -177,9 +177,8 @@ public class ObjectStorageComponent {
     }
 
     public static String getFullObjectName(String dir, String objectName) {
-        final String fullObjectName = (dir == null || Strings.isEmpty(dir)
+        return (dir == null || Strings.isEmpty(dir)
                 ? objectName
-                : dir.concat("/".concat(objectName))); //FileSystems.getDefault().getSeparator()
-        return fullObjectName;
+                : dir.concat("/".concat(objectName)));
     }
 }

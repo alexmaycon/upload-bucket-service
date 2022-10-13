@@ -1,5 +1,6 @@
 package dev.alexmaycon.bucketservice.batch;
 
+import dev.alexmaycon.bucketservice.batch.config.JobConfig;
 import dev.alexmaycon.bucketservice.batch.listener.JobUploadFileListener;
 import dev.alexmaycon.bucketservice.batch.runnable.RunnableJob;
 import dev.alexmaycon.bucketservice.batch.task.FileUploadTask;
@@ -14,6 +15,7 @@ import org.springframework.batch.core.*;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
+import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.core.job.builder.FlowBuilder;
 import org.springframework.batch.core.job.flow.Flow;
 import org.springframework.batch.core.job.flow.support.SimpleFlow;
@@ -40,7 +42,7 @@ import java.util.stream.Collectors;
 public class BatchUploadFiles {
 
     private final static Logger logger = LoggerFactory.getLogger(BatchUploadFiles.class);
-    private static final String JOB_NAME = "DEFAULT_CRON_JOB";
+    public static final String JOB_NAME = "DEFAULT_CRON_JOB";
 
     Map<String, ScheduledFuture<?>> jobsMap = new HashMap<>();
 
@@ -52,29 +54,35 @@ public class BatchUploadFiles {
 
     private final ServiceConfiguration configuration;
 
-    private final OciAuthComponent ociAuthComponent;
-
     private final TaskScheduler taskScheduler;
 
-    final
-    JobLauncher jobLauncher;
+    private JobConfig jobConfig;
+
+    private final JobLauncher jobLauncher;
+
+    private final OciAuthComponent ociAuthComponent;
+
+    private final JobExplorer jobExplorer;
+
 
     @Autowired
-    public BatchUploadFiles(JobBuilderFactory jobBuilderFactory, StepBuilderFactory stepBuilderFactory, JobUploadFileListener listener, ServiceConfiguration configuration, OciAuthComponent ociAuthComponent, TaskScheduler taskScheduler, JobLauncher jobLauncher) {
+    public BatchUploadFiles(JobBuilderFactory jobBuilderFactory, StepBuilderFactory stepBuilderFactory, JobUploadFileListener listener, ServiceConfiguration configuration, TaskScheduler taskScheduler, JobLauncher jobLauncher, JobConfig jobConfig,  OciAuthComponent ociAuthComponent, JobExplorer jobExplorer) {
 
         this.jobBuilderFactory = jobBuilderFactory;
         this.stepBuilderFactory = stepBuilderFactory;
         this.listener = listener;
         this.configuration = configuration;
-        this.ociAuthComponent = ociAuthComponent;
         this.taskScheduler = taskScheduler;
         this.jobLauncher = jobLauncher;
+        this.jobConfig = jobConfig;
+        this.ociAuthComponent = ociAuthComponent;
+        this.jobExplorer = jobExplorer;
 
         Assert.notNull(this.configuration.getService(), "application.properties file was not successfully loaded.");
         Assert.notNull(this.ociAuthComponent, ".oci file was not successfully loaded.");
     }
 
-    public Step createStep(String name, FolderConfig folderConfig) throws IOException {
+    public Step createStep(String jobName, String name, FolderConfig folderConfig) throws IOException {
         StepBuilder stepBuilder = this.stepBuilderFactory.get(name);
 
         final OciConfig oci = folderConfig.getOci() == null ? configuration.getService().getOci() : folderConfig.getOci();
@@ -86,18 +94,21 @@ public class BatchUploadFiles {
         fileUploadTask.setProfile(oci.getProfile());
         fileUploadTask.setCompartmentOcid(oci.getCompartmentOcid());
         fileUploadTask.setCreateBucketIfNotExists(oci.isCreateBucketIfNotExists());
-
         fileUploadTask.setOciAuthComponent(ociAuthComponent);
         fileUploadTask.setObjectStorageComponent(new ObjectStorageComponent(configuration));
         fileUploadTask.setOverrideFile(folderConfig.isOverwriteExistingFile());
         fileUploadTask.setBucketDir(folderConfig.getMapToBucketDir());
 
-        return stepBuilder.tasklet(fileUploadTask).throttleLimit(1).build();
+        final String cron = (folderConfig.getCron() == null ? configuration.getService().getCron() :folderConfig.getCron());
+
+        jobConfig.put(jobName, "DIRECTORY="+folderConfig.getDirectory()+";CRON="+cron +";BUCKET="+oci.getBucket());
+
+        return stepBuilder.tasklet(fileUploadTask).throttleLimit(1).startLimit(1).build();
     }
 
 
     public Flow splitFlow(List<Flow> flows) {
-        return new FlowBuilder<SimpleFlow>("split_flow").split(taskExecutor()).add(flows.toArray(new Flow[0])).end();
+        return new FlowBuilder<SimpleFlow>("split_flow").split(taskExecutor()).add(flows.toArray(new Flow[0])).build();
     }
 
     private boolean validateFolderConfig(FolderConfig folderConfig) {
@@ -124,7 +135,7 @@ public class BatchUploadFiles {
         return validateFolderConfig(folderConfig) && folderConfig.getCron() != null;
     }
 
-    public List<Flow> flows() {
+    public List<Flow> flows(String jobName) {
         final List<FolderConfig> listCleared = new ArrayList<>(
                 new LinkedHashSet<>(new ArrayList<>(configuration.getService().getFolders())));
 
@@ -139,7 +150,7 @@ public class BatchUploadFiles {
                     File file = new File(dir.getDirectory());
                     try {
                         logger.info("Creating step to folder config \"{}\".", file.getPath());
-                        return createStep("step_".concat(file.getName()).concat("_" + UUID.randomUUID()), dir);
+                        return createStep(jobName, "step_".concat(file.getName()).concat("_" + UUID.randomUUID()), dir);
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }
@@ -150,7 +161,7 @@ public class BatchUploadFiles {
         return steps.stream()
                 .map(step -> new FlowBuilder<SimpleFlow>("flow_".concat(step.getName()))
                 .start(step)
-                .end())
+                .build())
                 .collect(Collectors.toList());
     }
 
@@ -158,7 +169,9 @@ public class BatchUploadFiles {
     @Bean
     public Job job() {
         logger.info("Creating job {} with default cron {}.", JOB_NAME, configuration.getService().getCron());
-        return this.jobBuilderFactory.get(JOB_NAME).listener(listener).start(splitFlow(flows())).end().build();
+        List<Flow> flows = flows(JOB_NAME);
+        Flow flow = splitFlow(flows);
+        return this.jobBuilderFactory.get(JOB_NAME).listener(listener).start(flow).build().build();
     }
 
     @Bean
@@ -171,16 +184,19 @@ public class BatchUploadFiles {
                 .forEach(dir -> {
                     File file = new File(dir.getDirectory());
                     try {
-                        Step step = createStep("STEP_CUSTOM_CRON_".concat(file.getName()), dir);
                         FileUrlResource fileUrlResource = new FileUrlResource(dir.getDirectory());
                         String dirName = fileUrlResource.getFile().getName().toUpperCase().concat("_" + UUID.randomUUID().toString().toUpperCase());
+                        String jobName = "JOB_CUSTOM_CRON_DIR_".concat(dirName);
+                        Step step = createStep(jobName, "STEP_CUSTOM_CRON_".concat(file.getName()), dir);
 
-                        RunnableJob runnableJob = new RunnableJob(this.jobBuilderFactory.get("JOB_CUSTOM_CRON_DIR_".concat(dirName)).listener(listener).start(step).build(),
-                                this.jobLauncher);
+                        Job job = this.jobBuilderFactory.get(jobName).listener(listener).start(step).build();
+                        RunnableJob runnableJob = new RunnableJob(job, this.jobLauncher, jobExplorer);
 
                         logger.info("Created custom cron job {} to folder config \"{}\" with cron {}.", runnableJob.getName(), dir.getDirectory(), dir.getCron());
 
-                        ScheduledFuture<?> scheduledTask = taskScheduler.schedule(runnableJob, new CronTrigger(dir.getCron(), TimeZone.getTimeZone(TimeZone.getDefault().getID())));
+                        TimeZone timezone = TimeZone.getTimeZone(TimeZone.getDefault().getID());
+
+                        ScheduledFuture<?> scheduledTask = taskScheduler.schedule(runnableJob, new CronTrigger(dir.getCron(), timezone));
 
                         if (jobsMap.containsKey(runnableJob.getName())) {
                             removeScheduledTask(runnableJob.getName());
@@ -203,10 +219,8 @@ public class BatchUploadFiles {
 
     @Bean
     public TaskExecutor taskExecutor() {
-        SimpleAsyncTaskExecutor taskExecutor = new SimpleAsyncTaskExecutor("batch_upload_files");
-        taskExecutor.setConcurrencyLimit(2);
-        return taskExecutor;
+        //taskExecutor.setConcurrencyLimit(2);
+        return new SimpleAsyncTaskExecutor("batch_upload_files");
     }
-
 
 }

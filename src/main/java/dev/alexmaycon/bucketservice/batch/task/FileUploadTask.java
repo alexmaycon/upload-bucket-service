@@ -26,13 +26,11 @@ import java.util.Date;
 
 public class FileUploadTask implements Tasklet, InitializingBean {
 
-    private static Logger logger = LoggerFactory
-            .getLogger(FileUploadTask.class);
+    private final static Logger logger = LoggerFactory.getLogger(FileUploadTask.class);
 
     private Resource directory;
     private OciAuthComponent ociAuthComponent;
     private ObjectStorageComponent objectStorageComponent;
-
     private String bucketName;
     private String profile;
     private String bucketDir;
@@ -96,8 +94,6 @@ public class FileUploadTask implements Tasklet, InitializingBean {
                     if (overrideFile) {
                         logger.info("File {} will be overwritten as per the configuration.", fullFileName);
                     }
-
-
 
                     InputStream inputStream = null;
                     try {

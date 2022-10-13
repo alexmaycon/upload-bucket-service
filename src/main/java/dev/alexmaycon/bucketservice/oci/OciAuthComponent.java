@@ -13,16 +13,17 @@ import org.springframework.util.ResourceUtils;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.Arrays;
-import java.util.Objects;
 
 @Component
 public class OciAuthComponent {
 
+    private final Environment environment;
+
     @Autowired
-    private Environment environment;
+    public OciAuthComponent(Environment environment) {
+        this.environment = environment;
+    }
 
     public final ConfigFileReader.ConfigFile getConfigFile(String profile) throws IOException {
         String localProfile = (profile != null && Strings.isNotEmpty(profile) ? profile : "DEFAULT");
