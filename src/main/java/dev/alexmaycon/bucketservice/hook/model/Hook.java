@@ -1,14 +1,17 @@
 package dev.alexmaycon.bucketservice.hook.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.springframework.batch.core.JobExecution;
 
+import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 import java.util.stream.Collectors;
 
+@XmlRootElement
 public class Hook implements Serializable {
 
     private String jobName;
@@ -68,6 +71,7 @@ public class Hook implements Serializable {
         this.details = details;
     }
 
+    @JsonIgnore
     public static Hook parseJobExecution(JobExecution jobExecution, String details) {
         Hook hook = new Hook();
         hook.setJobName(jobExecution.getJobInstance().getJobName());

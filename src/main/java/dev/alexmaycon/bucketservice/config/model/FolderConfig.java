@@ -94,12 +94,12 @@ public class FolderConfig {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         FolderConfig that = (FolderConfig) o;
-        return directory.equals(that.directory);
+        return directory.equals(that.directory) && Objects.equals(cron, that.cron);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(directory);
+        return Objects.hash(directory, cron);
     }
 
     public boolean isValidDirectory() {
