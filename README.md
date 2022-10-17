@@ -40,6 +40,8 @@ You will be able to:
 - Save and replicate backup files in a secure and automated way.
 - Configure webhooks to receive notification of each run with job status and details.
 
+See all samples on [Wiki.](https://github.com/alexmaycon/upload-bucket-service/wiki)
+
 **Caution:** this app does not sync deleted files, that is, it does not delete the file in the Bucket, as the intention is to provide a secure way of syncing files, especially for backups.
 For file updates, it will only update modified files if the `service.folders[*].overwriteExistingFile` parameter is `true`.
 
@@ -195,9 +197,9 @@ root
 | service.folders[*].overwriteExistingFile | Enable/disable file overwriting                                                                         | No       | false                     | boolean |
 | service.folders[*].enabled               | Enables/disables folder processing.                                                                     | No       | true                      | boolean |
 | service.folders[*].mapToBucketDir        | Set the directory to use in bucket. Leave empty to use root.                                            | No       |                           | String  |
-| service.folders[*].profile               | Profile session of .oci configuration (apply only to folder)                                            | No       | "DEFAULT"                 | String  |
-| service.folders[*].bucket                | OCI Bucket name (apply only to folder)                                                                  | No       |                           | String  |
-| service.folders[*].compartmentOcid       | Compartment OCID - if you wanted to create the bucket in a specific compartment. (apply only to folder) | No       |                           | String  |
+| service.folders[*].oci.profile           | Profile session of .oci configuration (apply only to folder)                                            | No       | "DEFAULT"                 | String  |
+| service.folders[*].oci.bucket            | OCI Bucket name (apply only to folder)                                                                  | No       |                           | String  |
+| service.folders[*].oci.compartmentOcid   | Compartment OCID - if you wanted to create the bucket in a specific compartment. (apply only to folder) | No       |                           | String  |
 
 ##  About OCI API key - .oci 
 
