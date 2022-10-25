@@ -1,6 +1,7 @@
-# Files Upload Application for Buckets in Oracle Cloud Infrastructure
+# File Upload Application for Buckets in Oracle Cloud Infrastructure
 
 <!-- TOC -->
+* [README - Português-BR](/README.pt-br.md)
 * [About](#about)
   * [What you will need](#what-you-will-need)
     * [Service](#service)
@@ -29,7 +30,7 @@
 
 # About
 
-The upload-bucket-service project is an automatic file¹ upload application for Buckets in the Oracle Cloud Infrastructure Object Storage (OCI) service.
+The upload-bucket-service project is an automatic file¹ upload application for Buckets in the Oracle Cloud Infrastructure (OCI) Object Storage service.
 
 With few configurations it is possible to map multiple directories² and upload to Oracle Object Storage, allowing you to configure file overwriting, scheduling and webhook notification.
 
