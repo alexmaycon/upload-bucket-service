@@ -1,6 +1,5 @@
 package dev.alexmaycon.bucketservice.hook;
 
-import dev.alexmaycon.bucketservice.batch.listener.JobUploadFileListener;
 import dev.alexmaycon.bucketservice.config.ServiceConfiguration;
 import dev.alexmaycon.bucketservice.hook.model.Hook;
 import org.glassfish.jersey.client.ClientConfig;

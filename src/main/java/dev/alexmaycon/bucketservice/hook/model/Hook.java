@@ -8,13 +8,14 @@ import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
-import java.util.TimeZone;
 import java.util.stream.Collectors;
 
 @XmlRootElement
 public class Hook implements Serializable {
 
-    private String jobName;
+	private static final long serialVersionUID = 1L;
+	
+	private String jobName;
     private String jobStatus;
     private String details;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssZ", timezone = "GMT")
