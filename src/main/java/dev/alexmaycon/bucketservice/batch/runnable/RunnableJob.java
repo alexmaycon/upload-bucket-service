@@ -1,6 +1,5 @@
 package dev.alexmaycon.bucketservice.batch.runnable;
 
-import dev.alexmaycon.bucketservice.batch.BatchUploadFiles;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.*;
