@@ -1,5 +1,7 @@
 # File Upload Application for Buckets in Oracle Cloud Infrastructure
 
+[![Doar](https://www.paypalobjects.com/pt_BR/BR/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/donate/?hosted_button_id=LZ67TDQWYGKTG)
+
 <!-- TOC -->
 * [README - Português-BR](/README.pt-br.md)
 * [About](#about)
