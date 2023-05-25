@@ -21,7 +21,6 @@ import org.springframework.batch.core.job.flow.Flow;
 import org.springframework.batch.core.job.flow.support.SimpleFlow;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.step.builder.StepBuilder;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.FileUrlResource;
@@ -64,8 +63,6 @@ public class BatchUploadFiles {
 
     private final JobExplorer jobExplorer;
 
-
-    @Autowired
     public BatchUploadFiles(JobBuilderFactory jobBuilderFactory, StepBuilderFactory stepBuilderFactory, JobUploadFileListener listener, ServiceConfiguration configuration, TaskScheduler taskScheduler, JobLauncher jobLauncher, JobConfig jobConfig,  OciAuthComponent ociAuthComponent, JobExplorer jobExplorer) {
 
         this.jobBuilderFactory = jobBuilderFactory;
@@ -167,7 +164,7 @@ public class BatchUploadFiles {
 
 
     @Bean
-    public Job job() {
+    protected Job job() {
         logger.info("Creating job {} with default cron {}.", JOB_NAME, configuration.getService().getCron());
         List<Flow> flows = flows(JOB_NAME);
         Flow flow = splitFlow(flows);
@@ -175,7 +172,7 @@ public class BatchUploadFiles {
     }
 
     @Bean
-    public void createSeperatedCronJobs() {
+    protected void createSeperatedCronJobs() {
         final List<FolderConfig> listCleared = new ArrayList<>(
                 new LinkedHashSet<>(new ArrayList<>(configuration.getService().getFolders())));
 

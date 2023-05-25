@@ -16,7 +16,6 @@ import com.oracle.bmc.retrier.RetryConfiguration;
 import com.oracle.bmc.retrier.RetryOptions;
 import dev.alexmaycon.bucketservice.config.ServiceConfiguration;
 import org.apache.logging.log4j.util.Strings;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.ByteArrayInputStream;
@@ -30,7 +29,6 @@ public class ObjectStorageComponent {
 
 	private final ServiceConfiguration serviceConfiguration;
 
-	@Autowired
 	public ObjectStorageComponent(ServiceConfiguration serviceConfiguration) {
 		this.serviceConfiguration = serviceConfiguration;
 	}

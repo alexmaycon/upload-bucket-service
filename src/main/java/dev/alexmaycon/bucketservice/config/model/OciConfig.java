@@ -2,7 +2,7 @@ package dev.alexmaycon.bucketservice.config.model;
 
 import org.springframework.validation.annotation.Validated;
 
-import javax.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotEmpty;
 
 @Validated
 public class OciConfig {

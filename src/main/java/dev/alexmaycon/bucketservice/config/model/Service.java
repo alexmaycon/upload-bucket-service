@@ -2,8 +2,8 @@ package dev.alexmaycon.bucketservice.config.model;
 
 import org.springframework.validation.annotation.Validated;
 
-import javax.validation.constraints.*;
-import javax.ws.rs.core.MediaType;
+import jakarta.validation.constraints.*;
+import jakarta.ws.rs.core.MediaType;
 import java.util.List;
 
 @Validated

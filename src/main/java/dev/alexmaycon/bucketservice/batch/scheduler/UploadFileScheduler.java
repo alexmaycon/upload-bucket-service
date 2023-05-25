@@ -7,7 +7,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.*;
 import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.core.launch.JobLauncher;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.scheduling.support.CronExpression;
 import org.springframework.stereotype.Component;
@@ -30,7 +29,6 @@ public class UploadFileScheduler {
     final
     JobExplorer jobExplorer;
 
-    @Autowired
     public UploadFileScheduler(JobLauncher jobLauncher, Job job, ServiceConfiguration serviceConfiguration, JobExplorer jobExplorer) {
         this.jobLauncher = jobLauncher;
         this.job = job;

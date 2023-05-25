@@ -13,9 +13,9 @@ public class JobConfig {
     public JobConfig(){
         directoriesPerJobConfig = new HashMap<>();
     }
-
+    
     @Bean
-    public HashMap<String, String> getDirectoriesPerJobConfig(){
+	public HashMap<String, String> getDirectoriesPerJobConfig(){
         return this.directoriesPerJobConfig;
     }
 
