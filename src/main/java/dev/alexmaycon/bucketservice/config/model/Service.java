@@ -25,6 +25,8 @@ public class Service {
     @NotBlank
     private String cron;
 
+    private String nameDefaultJob;
+
     @Pattern(regexp = "^(?:^|[ \\t])((https?:\\/\\/)?(?:localhost|[\\w-]+(?:\\.[\\w-]+)+)(:\\d+)?(\\/\\S*)?)$", message = "'service.hook' must me a valid URL.")
     private String hook;
 
@@ -78,10 +80,19 @@ public class Service {
         this.hookContentType = hookContentType;
     }
 
+    public String getNameDefaultJob() {
+        return this.nameDefaultJob;
+    }
+
+    public void setNameDefaultJob(String nameDefaultJob) {
+        this.nameDefaultJob = nameDefaultJob;
+    }
+
     @Override
     public String toString() {
         return "Service{" +
-                "folders=" + folders +
+                "nameDefaultJob="+nameDefaultJob+
+                ", folders=" + folders +
                 ", attemptsFailure=" + attemptsFailure +
                 ", oci=" + oci +
                 ", cron='" + cron + '\'' +

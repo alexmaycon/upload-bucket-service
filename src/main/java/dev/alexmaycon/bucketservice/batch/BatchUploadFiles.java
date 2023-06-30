@@ -153,7 +153,7 @@ public class BatchUploadFiles {
                     }
                 }).collect(Collectors.toList());
 
-        Assert.notEmpty(steps, "No steps were created for the job " + JOB_NAME);
+        Assert.notEmpty(steps, "No steps were created for the job " + getDefaultJobName());
 
         return steps.stream()
                 .map(step -> new FlowBuilder<SimpleFlow>("flow_".concat(step.getName()))
@@ -165,10 +165,10 @@ public class BatchUploadFiles {
 
     @Bean
     protected Job job() {
-        logger.info("Creating job {} with default cron {}.", JOB_NAME, configuration.getService().getCron());
-        List<Flow> flows = flows(JOB_NAME);
+        logger.info("Creating job {} with default cron {}.", getDefaultJobName(), configuration.getService().getCron());
+        List<Flow> flows = flows(getDefaultJobName());
         Flow flow = splitFlow(flows);
-        return this.jobBuilderFactory.get(JOB_NAME).listener(listener).start(flow).build().build();
+        return this.jobBuilderFactory.get(getDefaultJobName()).listener(listener).start(flow).build().build();
     }
 
     @Bean
@@ -218,6 +218,10 @@ public class BatchUploadFiles {
     public TaskExecutor taskExecutor() {
         //taskExecutor.setConcurrencyLimit(2);
         return new SimpleAsyncTaskExecutor("batch_upload_files");
+    }
+
+    private String getDefaultJobName() {
+        return configuration.getService().getNameDefaultJob() == null ? JOB_NAME : configuration.getService().getNameDefaultJob().toUpperCase();
     }
 
 }

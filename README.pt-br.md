@@ -186,6 +186,7 @@ root
 
 | Propriedade                              | Descrição                                                                                                   | Obrigatório | Valor padrão              | Tipo    |
 |------------------------------------------|-------------------------------------------------------------------------------------------------------------|-------------|---------------------------|---------|
+| service.nameDefaultJob                   | Nome para o job padrão                                                                                      | Não         | "DEFAULT_CRON_JOB"        | String  |
 | service.cron                             | Expressão cron padrão para execução de todos os jobs                                                        | Não         | "0/10 * * * * ?"          | String  |
 | service.hook                             | URL do endpoint da API para ser notificado (POST) no final da execução do JOB                               | Não         |                           | String  |
 | service.hookContentType                  | Media type (json/xml)                                                                                       | Não         | "application/json"        | String  |
