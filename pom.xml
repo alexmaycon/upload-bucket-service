@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>2.7.12</version>
+		<version>2.7.13</version>
 		<relativePath />
 	</parent>
 	<groupId>dev.alexmaycon</groupId>
@@ -64,61 +63,28 @@
 		<dependency>
 			<groupId>com.oracle.oci.sdk</groupId>
 			<artifactId>oci-java-sdk-objectstorage</artifactId>
-			<version>3.14.0</version>
+			<version>3.18.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-simple</artifactId>
 			<scope>runtime</scope>
 		</dependency>
-		<!--
-		https://mvnrepository.com/artifact/jakarta.xml.bind/jakarta.xml.bind-api -->
-		<!-- https://mvnrepository.com/artifact/jakarta.xml.bind/jakarta.xml.bind-api -->
-		<dependency>
-		    <groupId>jakarta.xml.bind</groupId>
-		    <artifactId>jakarta.xml.bind-api</artifactId>
-		    <version>4.0.0</version>
-		</dependency>
-
-		<!--
-		https://mvnrepository.com/artifact/jakarta.validation/jakarta.validation-api -->
-		<dependency>
-			<groupId>jakarta.validation</groupId>
-			<artifactId>jakarta.validation-api</artifactId>
-			<version>3.0.2</version>
-		</dependency>
-
-		<!--
-		https://mvnrepository.com/artifact/jakarta.activation/jakarta.activation-api -->
-		<dependency>
-			<groupId>
-				jakarta.activation</groupId>
-			<artifactId>jakarta.activation-api</artifactId>
-		</dependency>
-		<!-- https://mvnrepository.com/artifact/commons-codec/commons-codec -->
 		<dependency>
 			<groupId>
 				commons-codec</groupId>
 			<artifactId>commons-codec</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>
-				org.glassfish.jaxb</groupId>
-			<artifactId>jaxb-runtime</artifactId>
+			<groupId>com.oracle.oci.sdk</groupId>
+			<artifactId>oci-java-sdk-common-httpclient-jersey</artifactId>
+			<version>3.18.0</version>
 		</dependency>
 		<dependency>
-			<groupId>
-				org.glassfish.jersey.media</groupId>
-			<artifactId>jersey-media-jaxb</artifactId>
+			<groupId>com.oracle.oci.sdk</groupId>
+			<artifactId>oci-java-sdk-addons-apache-configurator-jersey</artifactId>
+			<version>3.18.0</version>
 		</dependency>
-		<!-- https://mvnrepository.com/artifact/jakarta.ws.rs/jakarta.ws.rs-api -->
-		<dependency>
-			<groupId>
-				jakarta.ws.rs</groupId>
-			<artifactId>jakarta.ws.rs-api</artifactId>
-			<version>3.1.0</version>
-		</dependency>
-
 	</dependencies>
 
 	<build>
@@ -131,6 +97,7 @@
 				<excludes>
 					<exclude>**/application.properties</exclude>
 					<exclude>**/.oci</exclude>
+					<exclude>**/.pem</exclude>
 				</excludes>
 			</resource>
 		</resources>

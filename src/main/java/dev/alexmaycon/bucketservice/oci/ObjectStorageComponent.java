@@ -41,12 +41,13 @@ public class ObjectStorageComponent {
 
 	public final ObjectStorage getObjectStorage(ConfigFileReader.ConfigFile configFile,
 			AuthenticationDetailsProvider provider) throws Exception {
-		ObjectStorage client = new ObjectStorageClient(provider);
 		String regionId = configFile.get("region");
 		if (regionId == null || Strings.isEmpty(regionId)) {
 			throw new Exception("Region not informed in the configuration file.");
 		}
-		client.setRegion(Region.fromRegionId(regionId));
+
+		ObjectStorage client = ObjectStorageClient.builder().region(Region.fromRegionId(regionId)).build(provider);
+		
 		return client;
 	}
 

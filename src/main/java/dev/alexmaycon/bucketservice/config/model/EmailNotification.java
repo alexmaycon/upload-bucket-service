@@ -2,7 +2,7 @@ package dev.alexmaycon.bucketservice.config.model;
 
 import org.springframework.validation.annotation.Validated;
 
-import jakarta.validation.constraints.Pattern;
+import javax.validation.constraints.Pattern;
 
 @Validated
 public class EmailNotification {
