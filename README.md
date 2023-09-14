@@ -14,6 +14,7 @@
     * [Multiple buckets](#multiple-buckets)
     * [Job scheduling](#job-scheduling)
     * [Attempts failure](#attempts-failure)
+    * [E-mail notification](#e-mail-notification)
     * [Webhook notification](#webhook-notification)
   * [Settings](#settings)
     * [application.properties](#applicationproperties)
