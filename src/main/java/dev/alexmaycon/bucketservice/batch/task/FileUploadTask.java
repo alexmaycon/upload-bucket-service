@@ -3,6 +3,8 @@ package dev.alexmaycon.bucketservice.batch.task;
 import com.oracle.bmc.ConfigFileReader;
 import com.oracle.bmc.model.BmcException;
 import com.oracle.bmc.objectstorage.ObjectStorage;
+import com.oracle.bmc.objectstorage.responses.CreatePreauthenticatedRequestResponse;
+import com.oracle.bmc.objectstorage.responses.GetObjectResponse;
 import com.oracle.bmc.objectstorage.responses.HeadBucketResponse;
 import com.oracle.bmc.objectstorage.responses.HeadObjectResponse;
 import dev.alexmaycon.bucketservice.oci.ObjectStorageComponent;
@@ -124,6 +126,9 @@ public class FileUploadTask implements Tasklet, InitializingBean {
                             } else {
                                 logger.info("File {} uploaded successfully.", fullFileName);
                             }
+                            
+                            CreatePreauthenticatedRequestResponse rr = objectStorageComponent.createPreauthenticatedRequest(objectStorage,namespace, bucketName, fullFileName);
+                            logger.info(rr.getPreauthenticatedRequest().getFullPath());
                         }
                         try {
                             inputStream.close();

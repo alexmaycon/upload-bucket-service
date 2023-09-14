@@ -77,13 +77,17 @@
 		</dependency>
 		<dependency>
 			<groupId>com.oracle.oci.sdk</groupId>
-			<artifactId>oci-java-sdk-common-httpclient-jersey3</artifactId>
+			<artifactId>oci-java-sdk-common-httpclient-jersey</artifactId>
 			<version>3.18.0</version>
 		</dependency>
 		<dependency>
 			<groupId>com.oracle.oci.sdk</groupId>
-			<artifactId>oci-java-sdk-addons-apache-configurator-jersey3</artifactId>
+			<artifactId>oci-java-sdk-addons-apache-configurator-jersey</artifactId>
 			<version>3.18.0</version>
+		</dependency>
+		<dependency>
+		    <groupId>com.sendgrid</groupId>
+		    <artifactId>sendgrid-java</artifactId>
 		</dependency>
 	</dependencies>
 

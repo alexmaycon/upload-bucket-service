@@ -8,7 +8,9 @@ import com.oracle.bmc.objectstorage.ObjectStorage;
 import com.oracle.bmc.objectstorage.ObjectStorageClient;
 import com.oracle.bmc.objectstorage.model.Bucket;
 import com.oracle.bmc.objectstorage.model.CreateBucketDetails;
+import com.oracle.bmc.objectstorage.model.CreatePreauthenticatedRequestDetails;
 import com.oracle.bmc.objectstorage.model.ListObjects;
+import com.oracle.bmc.objectstorage.model.PreauthenticatedRequest;
 import com.oracle.bmc.objectstorage.requests.*;
 import com.oracle.bmc.objectstorage.responses.*;
 import com.oracle.bmc.retrier.DefaultRetryCondition;
@@ -22,6 +24,9 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystems;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.HashMap;
 
 @Component
@@ -138,5 +143,37 @@ public class ObjectStorageComponent {
 
 	public static String getFullObjectName(String dir, String objectName) {
 		return (dir == null || Strings.isEmpty(dir) ? objectName : dir.concat("/".concat(objectName)));
+	}
+	
+	public CreatePreauthenticatedRequestResponse createPreauthenticatedRequest(ObjectStorage objectStorage, String namespaceName, String bucketName,
+			String objectName) {
+		CreatePreauthenticatedRequestDetails createPreauthenticatedRequestDetails = CreatePreauthenticatedRequestDetails.builder()
+				.name("par-ubs-"+objectName)
+				.bucketListingAction(PreauthenticatedRequest.BucketListingAction.Deny)
+				.objectName(objectName)
+				.accessType(CreatePreauthenticatedRequestDetails.AccessType.ObjectRead)
+				.timeExpires(java.util.Date.from(getTimeExpire().atStartOfDay(ZoneId.systemDefault()).toInstant())).build();
+
+			CreatePreauthenticatedRequestRequest createPreauthenticatedRequestRequest = CreatePreauthenticatedRequestRequest.builder()
+				.namespaceName(namespaceName)
+				.bucketName(bucketName)
+				.createPreauthenticatedRequestDetails(createPreauthenticatedRequestDetails)
+				.build();
+
+		        CreatePreauthenticatedRequestResponse response = objectStorage.createPreauthenticatedRequest(createPreauthenticatedRequestRequest);
+		        //response.getPreauthenticatedRequest().getFullPath();
+		        return response;
+	}
+	
+	private LocalDate getTimeExpire() {
+		LocalDate dataAtual = LocalDate.now();
+        LocalDate dataFutura = dataAtual.plusMonths(6);
+
+        if (dataFutura.getDayOfWeek() == DayOfWeek.SATURDAY) {
+            dataFutura = dataFutura.plusDays(2);
+        } else if (dataFutura.getDayOfWeek() == DayOfWeek.SUNDAY) {
+            dataFutura = dataFutura.plusDays(1);
+        }
+        return dataFutura;
 	}
 }
