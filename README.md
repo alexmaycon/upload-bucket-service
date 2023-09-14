@@ -113,6 +113,14 @@ Samples:
 
 Allows you to set execution attempts when a failure occurs during job processing.
 
+### E-mail notification
+
+You can configure email sending to receive notifications of job executions, which may contain just the name of the files or also a link to download them.
+
+#### Sendgrid
+
+To configure, simply define the SendGrid API in the `service.email.sendgrid.apiKey` parameter.
+
 ### Webhook notification
 
 You can configure an API URL that you will be **notified** when the job finishes running (either to failure or success). **Your API must accept the POST method.**
@@ -133,6 +141,12 @@ On `details` field, each directory is separated by the '¢' character and the di
 	"details": "DIRECTORY=C:/temp;CRON=0/10 * * * * ?;BUCKET=teste¢DIRECTORY=C:/temp2;CRON=0/10 * * * * ?;BUCKET=teste",
 	"createdTime": "2022-10-12T22:26:05+0000",
 	"endTime": "2022-10-12T22:26:08+0000",
+	"files": [
+	  	{
+	  		"fileName": "xyz.abc",
+	  		"url": "https://...."
+	  	}
+	]
 	"exceptions": []
 }
 ```
@@ -146,6 +160,14 @@ On `details` field, each directory is separated by the '¢' character and the di
   "details": "DIRECTORY=C:/temp;CRON=0/10 * * * * ?;BUCKET=teste",
   "createdTime": "2022-10-12T22:57:54+0000",
   "endTime": "2022-10-12T22:57:57+0000",
+  "files": [{
+  	"fileName": "xyz.abc",
+  	"url": "https://...."
+  },
+  {
+  	"fileName": "xyz.abc",
+  	"url": "https://...."
+  }]
   "exceptions": [
     {
       "cause": null,
@@ -188,13 +210,16 @@ root
 |------------------------------------------|---------------------------------------------------------------------------------------------------------|----------|---------------------------|---------|
 | service.nameDefaultJob                   | Default job name                                                                                        | No       | "DEFAULT_CRON_JOB"        | String  |
 | service.cron                             | Default cron expression to all jobs execution                                                           | No       | "0/10 * * * * ?"          | String  |
+| service.email.sendgrid.apiKey            | Sendgrid API Key                        																 | No       |                           | String  |
+| service.email.sender                     | Sender e-mail                          																 | No       |                           | String  |
+| service.email.recipients[*]              | Recipients e-mail                          															 | No       |                           | String  |
 | service.hook                             | API endpoint URL at which to be notified (POST) at the end of the JOB execution.                        | No       |                           | String  |
 | service.hookContentType                  | Media type (json/xml)                                                                                   | No       | "application/json"        | String  |
 | service.attemptsFailure                  | Number of attempts when a failure occurs                                                                | No       | 1                         | int     |
 | service.oci.profile                      | Profile session of .oci configuration                                                                   | No       | "DEFAULT"                 | String  |
 | service.oci.bucket                       | OCI Bucket name                                                                                         | **Yes**  |                           | String  |
 | service.oci.compartmentOcid              | Compartment OCID - if you wanted to create the bucket in a specific compartment.                        | No       |                           | String  |
-| service.oci.generatePreauthenticatedUrl  | Generate Pre-authenticated URL to access the object.			                                         | No       | false                           | boolean |
+| service.oci.generatePreauthenticatedUrl  | Generate Pre-authenticated URL to access the object (sended in hook and e-mail)                         | No       | false                           | boolean |
 | service.folders[*]                       | Folders configuration                                                                                   | **Yes**  |                           | List    |
 | service.folders[*].directory             | Folder path (need to include escape character for \ on Windows)                                         | **Yes**  |                           | String  |
 | service.folders[*].cron                  | Cron expression specifies to the folder                                                                 | No       | Value from *service.cron* | String  |
@@ -204,7 +229,7 @@ root
 | service.folders[*].oci.profile           | Profile session of .oci configuration (apply only to folder)                                            | No       | "DEFAULT"                 | String  |
 | service.folders[*].oci.bucket            | OCI Bucket name (apply only to folder)                                                                  | No       |                           | String  |
 | service.folders[*].oci.compartmentOcid   | Compartment OCID - if you wanted to create the bucket in a specific compartment. (apply only to folder) | No       |                           | String  |
-| service.folders[*].generatePreauthenticatedUrl  | Generate Pre-authenticated URL to access the object (apply only to folder) .			         | No       | false                           | boolean |
+| service.folders[*].generatePreauthenticatedUrl  | Generate Pre-authenticated URL to access the object (sended in hook and e-mail).		         | No       | false                           | boolean |
 
 ##  About OCI API key (.oci)
 

@@ -73,7 +73,7 @@ public class FileUploadTask implements Tasklet, InitializingBean {
         logger.info("Starting file scan in directory '{}'.", dir.getPath());
         
         HashMap<String, String> pars = new HashMap<>();
-
+        
         if (dir.isDirectory()) {
 
             if (bucketDir != null) {
@@ -156,11 +156,13 @@ public class FileUploadTask implements Tasklet, InitializingBean {
         }
         objectStorage.close();
         
+        ExecutionContext ec = chunkContext.getStepContext().getStepExecution().getJobExecution().getExecutionContext();
+    	ec.put("Dir", dir.getName());
+    	
         if (!pars.isEmpty()) {
-        	ExecutionContext ec = chunkContext.getStepContext().getStepExecution().getJobExecution().getExecutionContext();
         	ec.put("MapFiles", pars);
         }
-
+        
         logger.info("Finished task for file upload...");
         return RepeatStatus.FINISHED;
     }

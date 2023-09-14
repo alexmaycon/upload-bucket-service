@@ -31,6 +31,8 @@ public class Service {
     private String hook;
 
     private String hookContentType = MediaType.APPLICATION_JSON;
+    
+    private EmailConfig email;
 
     public List<FolderConfig> getFolders() {
         return folders;
@@ -87,8 +89,16 @@ public class Service {
     public void setNameDefaultJob(String nameDefaultJob) {
         this.nameDefaultJob = nameDefaultJob;
     }
+    
+    public EmailConfig getEmail() {
+		return email;
+	}
 
-    @Override
+	public void setEmail(EmailConfig email) {
+		this.email = email;
+	}
+
+	@Override
     public String toString() {
         return "Service{" +
                 "nameDefaultJob="+nameDefaultJob+
