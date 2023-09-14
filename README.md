@@ -15,10 +15,9 @@
     * [Job scheduling](#job-scheduling)
     * [Attempts failure](#attempts-failure)
     * [Webhook notification](#webhook-notification)
-  * [Coming soon features](#coming-soon-features)
   * [Settings](#settings)
     * [application.properties](#applicationproperties)
-  * [About OCI API key - .oci](#about-oci-api-key---oci)
+  * [About OCI API key (.oci)](#about-oci-api-key-oci)
   * [Sample **.oci** file:](#sample-oci-file-)
   * [Sample application.properties file](#sample-applicationproperties-file)
   * [Building](#building)
@@ -54,7 +53,7 @@ For file updates, it will only update modified files if the `service.folders[*].
 
 ## What you will need
 
-- OCI Client API key file and key file - see more details on [About OCI API key - .oci](#about-oci-api-key---oci);
+- OCI Client API key file and key file - see more details on [About OCI API key (.oci)](#about-oci-api-key-oci);
 - Configure directories in application.properties file;
 - **Only that!**
 
@@ -205,7 +204,7 @@ root
 | service.folders[*].oci.bucket            | OCI Bucket name (apply only to folder)                                                                  | No       |                           | String  |
 | service.folders[*].oci.compartmentOcid   | Compartment OCID - if you wanted to create the bucket in a specific compartment. (apply only to folder) | No       |                           | String  |
 
-##  About OCI API key - .oci 
+##  About OCI API key (.oci)
 
 - [To create a Customer Secret key;](https://docs.oracle.com/en-us/iaas/Content/Identity/Tasks/managingcredentials.htm#create-secret-key)
 - [To get the config file snippet for an API signing key.](https://docs.oracle.com/en-us/iaas/Content/Identity/Tasks/managingcredentials.htm#)

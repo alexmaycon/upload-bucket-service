@@ -17,7 +17,7 @@
     * [Notificação Webhook](#notificao-webhook)
   * [Configurações](#configuraes)
     * [application.properties](#applicationproperties)
-  * [Sobre a chave da API OCI - .oci](#sobre-a-chave-da-api-oci---oci)
+  * [Sobre a chave da API OCI (.oci)](#sobre-a-chave-da-api-oci-oci)
   * [Exemplo de arquivo .oci:](#exemplo-de-arquivo-oci)
   * [Exemplo de arquivo application.properties](#exemplo-de-arquivo-applicationproperties)
   * [Construindo](#construindo)
@@ -53,15 +53,15 @@ Para atualizações de arquivos, ele só atualizará os arquivos modificados se 
 
 ## O que você irá precisar
 
-- Arquivo de chave da API do cliente OCI e arquivo de chave - veja mais detalhes em [Sobre a chave da API OCI - .oci](#sobre-a-chave-da-api-oci---oci);
+- Arquivo de chave da API do cliente OCI e arquivo de chave - veja mais detalhes em [Sobre a chave da API OCI (.oci)](#sobre-a-chave-da-api-oci-oci);
 - Configurar diretórios no arquivo application.properties;
 - **Só isso!**
 
-Veja mais detalhes em [Configurações](#configuraes) abaixo.
+Veja mais detalhes em [Configurações](#configura-es) abaixo.
 
 ### Service
 
-Veja [Sob demanda e compatível com serviço](#sob-demanda-e-compatvel-com-servio) abaixo.
+Veja [Sob demanda e compatível com serviço](#sob-demanda-e-compat-vel-com-servi-o) abaixo.
 
 ## Requisitos de sistema
 
@@ -204,7 +204,7 @@ root
 | service.folders[*].oci.bucket            | Nome do bucket OCI (aplica-se apenas à pasta)                                                               | Não         |                           | String  |
 | service.folders[*].oci.compartmentOcid   | Compartment OCID - se você quiser criar o bucket em um compartimento específico. (aplica-se apenas à pasta) | Não         |                           | String  |
 
-##  Sobre a chave da API OCI - .oci
+##  Sobre a chave da API OCI (.oci)
 
 - [To create a Customer Secret key;](https://docs.oracle.com/en-us/iaas/Content/Identity/Tasks/managingcredentials.htm#create-secret-key)
 - [To get the config file snippet for an API signing key.](https://docs.oracle.com/en-us/iaas/Content/Identity/Tasks/managingcredentials.htm#)

@@ -28,7 +28,7 @@
 		<url>https://github.com/alexmaycon/upload-bucket-service</url>
 	</scm>
 	<properties>
-		<java.version>11</java.version>
+		<java.version>17</java.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -77,12 +77,12 @@
 		</dependency>
 		<dependency>
 			<groupId>com.oracle.oci.sdk</groupId>
-			<artifactId>oci-java-sdk-common-httpclient-jersey</artifactId>
+			<artifactId>oci-java-sdk-common-httpclient-jersey3</artifactId>
 			<version>3.18.0</version>
 		</dependency>
 		<dependency>
 			<groupId>com.oracle.oci.sdk</groupId>
-			<artifactId>oci-java-sdk-addons-apache-configurator-jersey</artifactId>
+			<artifactId>oci-java-sdk-addons-apache-configurator-jersey3</artifactId>
 			<version>3.18.0</version>
 		</dependency>
 	</dependencies>
