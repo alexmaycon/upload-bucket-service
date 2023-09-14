@@ -194,6 +194,7 @@ root
 | service.oci.profile                      | Profile session of .oci configuration                                                                   | No       | "DEFAULT"                 | String  |
 | service.oci.bucket                       | OCI Bucket name                                                                                         | **Yes**  |                           | String  |
 | service.oci.compartmentOcid              | Compartment OCID - if you wanted to create the bucket in a specific compartment.                        | No       |                           | String  |
+| service.oci.generatePreauthenticatedUrl  | Generate Pre-authenticated URL to access the object.			                                         | No       | false                           | boolean |
 | service.folders[*]                       | Folders configuration                                                                                   | **Yes**  |                           | List    |
 | service.folders[*].directory             | Folder path (need to include escape character for \ on Windows)                                         | **Yes**  |                           | String  |
 | service.folders[*].cron                  | Cron expression specifies to the folder                                                                 | No       | Value from *service.cron* | String  |
@@ -203,6 +204,7 @@ root
 | service.folders[*].oci.profile           | Profile session of .oci configuration (apply only to folder)                                            | No       | "DEFAULT"                 | String  |
 | service.folders[*].oci.bucket            | OCI Bucket name (apply only to folder)                                                                  | No       |                           | String  |
 | service.folders[*].oci.compartmentOcid   | Compartment OCID - if you wanted to create the bucket in a specific compartment. (apply only to folder) | No       |                           | String  |
+| service.folders[*].generatePreauthenticatedUrl  | Generate Pre-authenticated URL to access the object (apply only to folder) .			         | No       | false                           | boolean |
 
 ##  About OCI API key (.oci)
 

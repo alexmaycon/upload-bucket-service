@@ -154,15 +154,13 @@ public class ObjectStorageComponent {
 				.accessType(CreatePreauthenticatedRequestDetails.AccessType.ObjectRead)
 				.timeExpires(java.util.Date.from(getTimeExpire().atStartOfDay(ZoneId.systemDefault()).toInstant())).build();
 
-			CreatePreauthenticatedRequestRequest createPreauthenticatedRequestRequest = CreatePreauthenticatedRequestRequest.builder()
-				.namespaceName(namespaceName)
-				.bucketName(bucketName)
-				.createPreauthenticatedRequestDetails(createPreauthenticatedRequestDetails)
-				.build();
+		CreatePreauthenticatedRequestRequest createPreauthenticatedRequestRequest = CreatePreauthenticatedRequestRequest.builder()
+			.namespaceName(namespaceName)
+			.bucketName(bucketName)
+			.createPreauthenticatedRequestDetails(createPreauthenticatedRequestDetails)
+			.build();
 
-		        CreatePreauthenticatedRequestResponse response = objectStorage.createPreauthenticatedRequest(createPreauthenticatedRequestRequest);
-		        //response.getPreauthenticatedRequest().getFullPath();
-		        return response;
+	   return objectStorage.createPreauthenticatedRequest(createPreauthenticatedRequestRequest);
 	}
 	
 	private LocalDate getTimeExpire() {

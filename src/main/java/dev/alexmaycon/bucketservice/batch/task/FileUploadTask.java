@@ -1,30 +1,37 @@
 package dev.alexmaycon.bucketservice.batch.task;
 
-import com.oracle.bmc.ConfigFileReader;
-import com.oracle.bmc.model.BmcException;
-import com.oracle.bmc.objectstorage.ObjectStorage;
-import com.oracle.bmc.objectstorage.responses.CreatePreauthenticatedRequestResponse;
-import com.oracle.bmc.objectstorage.responses.GetObjectResponse;
-import com.oracle.bmc.objectstorage.responses.HeadBucketResponse;
-import com.oracle.bmc.objectstorage.responses.HeadObjectResponse;
-import dev.alexmaycon.bucketservice.oci.ObjectStorageComponent;
-import dev.alexmaycon.bucketservice.oci.OciAuthComponent;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+
 import org.apache.commons.codec.digest.DigestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
+import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.io.Resource;
 import org.springframework.util.Assert;
 
-import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.Date;
+import com.oracle.bmc.ConfigFileReader;
+import com.oracle.bmc.model.BmcException;
+import com.oracle.bmc.objectstorage.ObjectStorage;
+import com.oracle.bmc.objectstorage.responses.CreatePreauthenticatedRequestResponse;
+import com.oracle.bmc.objectstorage.responses.HeadBucketResponse;
+import com.oracle.bmc.objectstorage.responses.HeadObjectResponse;
+
+import dev.alexmaycon.bucketservice.oci.ObjectStorageComponent;
+import dev.alexmaycon.bucketservice.oci.OciAuthComponent;
 
 public class FileUploadTask implements Tasklet, InitializingBean {
 
@@ -39,11 +46,11 @@ public class FileUploadTask implements Tasklet, InitializingBean {
     private String compartmentOcid;
     private boolean overrideFile = false;
     private boolean createBucketIfNotExists = false;
+    private boolean generatePreauthenticatedUrl = false;
 
     @Override
     public RepeatStatus execute(StepContribution stepContribution, ChunkContext chunkContext) throws Exception {
         logger.info("Starting task for file upload...");
-
         ConfigFileReader.ConfigFile configFile = ociAuthComponent.getConfigFile(profile);
         final String tenancyOcid = configFile.get("tenancy");
 
@@ -64,6 +71,8 @@ public class FileUploadTask implements Tasklet, InitializingBean {
             throw new RuntimeException(e);
         }
         logger.info("Starting file scan in directory '{}'.", dir.getPath());
+        
+        HashMap<String, String> pars = new HashMap<>();
 
         if (dir.isDirectory()) {
 
@@ -127,8 +136,12 @@ public class FileUploadTask implements Tasklet, InitializingBean {
                                 logger.info("File {} uploaded successfully.", fullFileName);
                             }
                             
-                            CreatePreauthenticatedRequestResponse rr = objectStorageComponent.createPreauthenticatedRequest(objectStorage,namespace, bucketName, fullFileName);
-                            logger.info(rr.getPreauthenticatedRequest().getFullPath());
+                            if (generatePreauthenticatedUrl) {
+	                            CreatePreauthenticatedRequestResponse rr = objectStorageComponent.createPreauthenticatedRequest(objectStorage,namespace, bucketName, fullFileName);
+	                            pars.put(fullFileName, rr.getPreauthenticatedRequest().getFullPath());
+	                            logger.info("Generated pre authenticated URL to file {}.", fullFileName);
+                            } else
+                            	pars.put(fullFileName, null);
                         }
                         try {
                             inputStream.close();
@@ -142,6 +155,11 @@ public class FileUploadTask implements Tasklet, InitializingBean {
             logger.info("Finishing file scan in directory '{}'.", dir.getPath());
         }
         objectStorage.close();
+        
+        if (!pars.isEmpty()) {
+        	ExecutionContext ec = chunkContext.getStepContext().getStepExecution().getJobExecution().getExecutionContext();
+        	ec.put("MapFiles", pars);
+        }
 
         logger.info("Finished task for file upload...");
         return RepeatStatus.FINISHED;
@@ -160,7 +178,6 @@ public class FileUploadTask implements Tasklet, InitializingBean {
             if (e.getStatusCode() == 404) {
                 bucketExists = false;
             }
-
         }
 
         Assert.isTrue(!(!bucketExists && !createBucketIfNotExists), "Bucket " + bucketName + " not found on namespace " + namespace + " on OCI and 'createBucketIfNotExists' is disabled.");
@@ -263,4 +280,12 @@ public class FileUploadTask implements Tasklet, InitializingBean {
     public void setCompartmentOcid(String compartmentOcid) {
         this.compartmentOcid = compartmentOcid;
     }
+
+	public boolean isGeneratePreauthenticatedUrl() {
+		return generatePreauthenticatedUrl;
+	}
+
+	public void setGeneratePreauthenticatedUrl(boolean generatePreauthenticatedUrl) {
+		this.generatePreauthenticatedUrl = generatePreauthenticatedUrl;
+	}
 }

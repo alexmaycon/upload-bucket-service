@@ -15,6 +15,8 @@ public class OciConfig {
     private String compartmentOcid;
 
     private boolean createBucketIfNotExists=false;
+    
+    private boolean generatePreauthenticatedUrl=false;
 
     public String getProfile() {
         return profile == null ? "DEFAULT" : profile;
@@ -46,15 +48,24 @@ public class OciConfig {
 
     public void setCompartmentOcid(String compartmentOcid) {
         this.compartmentOcid = compartmentOcid;
-    }
+    }  
+    
+    public boolean isGeneratePreauthenticatedUrl() {
+		return generatePreauthenticatedUrl;
+	}
 
-    @Override
+	public void setGeneratePreauthenticatedUrl(boolean generatePreauthenticatedUrl) {
+		this.generatePreauthenticatedUrl = generatePreauthenticatedUrl;
+	}
+
+	@Override
     public String toString() {
         return "OciConfig{" +
                 "profile='" + profile + '\'' +
                 ", bucket='" + bucket + '\'' +
                 ", compartmentId='" + compartmentOcid + '\'' +
                 ", createBucketIfNotExists=" + createBucketIfNotExists +
+                ", generatePreauthenticatedUrl=" + generatePreauthenticatedUrl +
                 '}';
     }
 }

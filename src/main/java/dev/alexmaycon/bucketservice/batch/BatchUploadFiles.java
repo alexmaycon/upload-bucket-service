@@ -95,6 +95,7 @@ public class BatchUploadFiles {
         fileUploadTask.setObjectStorageComponent(new ObjectStorageComponent(configuration));
         fileUploadTask.setOverrideFile(folderConfig.isOverwriteExistingFile());
         fileUploadTask.setBucketDir(folderConfig.getMapToBucketDir());
+        fileUploadTask.setGeneratePreauthenticatedUrl(oci.isGeneratePreauthenticatedUrl());
 
         final String cron = (folderConfig.getCron() == null ? configuration.getService().getCron() :folderConfig.getCron());
 

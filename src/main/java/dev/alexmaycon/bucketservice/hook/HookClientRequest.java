@@ -36,13 +36,15 @@ public class HookClientRequest {
             Client client = ClientBuilder.newClient();
 
             WebTarget target = client.target(hook);
-
+            
+        	HashMap<String, String> files = (HashMap<String, String>) jobExecution.getExecutionContext().get("MapFiles");
+        	
             String details = directoriesPerJobConfig.get(jobExecution.getJobInstance().getJobName());
 
             Response response = target
                     .request()
                     .accept(contentType)
-                    .post(Entity.entity(Hook.parseJobExecution(jobExecution, details), contentType), Response.class);
+                    .post(Entity.entity(Hook.parseJobExecution(jobExecution, details, files), contentType), Response.class);
 
             if (response.getStatus() == 200) {
                 logger.info("Job {} hook notification as sent successfully.", jobExecution.getJobInstance().getJobName());
