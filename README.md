@@ -222,6 +222,7 @@ root
 | service.oci.compartmentOcid              | Compartment OCID - if you wanted to create the bucket in a specific compartment.                        | No       |                           | String  |
 | service.oci.generatePreauthenticatedUrl  | Generate Pre-authenticated URL to access the object (sended in hook and e-mail)                         | No       | false                           | boolean |
 | service.folders[*]                       | Folders configuration                                                                                   | **Yes**  |                           | List    |
+| service.folders[*].jobName               | Job name for current folder                                                                             | No       |                           | String  |
 | service.folders[*].directory             | Folder path (need to include escape character for \ on Windows)                                         | **Yes**  |                           | String  |
 | service.folders[*].cron                  | Cron expression specifies to the folder                                                                 | No       | Value from *service.cron* | String  |
 | service.folders[*].overwriteExistingFile | Enable/disable file overwriting                                                                         | No       | false                     | boolean |

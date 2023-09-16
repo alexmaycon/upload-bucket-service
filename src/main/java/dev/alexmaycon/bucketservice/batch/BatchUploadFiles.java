@@ -182,9 +182,12 @@ public class BatchUploadFiles {
                 .forEach(dir -> {
                     File file = new File(dir.getDirectory());
                     try {
+                    	
                         FileUrlResource fileUrlResource = new FileUrlResource(dir.getDirectory());
                         String dirName = fileUrlResource.getFile().getName().toUpperCase().concat("_" + UUID.randomUUID().toString().toUpperCase());
-                        String jobName = "JOB_CUSTOM_CRON_DIR_".concat(dirName);
+                        String jobName = dir.getJobName() == null 
+                        		? "JOB_DIR_".concat(dirName)
+                        		: dir.getJobName();
                         Step step = createStep(jobName, "STEP_CUSTOM_CRON_".concat(file.getName()), dir);
 
                         Job job = this.jobBuilderFactory.get(jobName).listener(listener).start(step).build();
