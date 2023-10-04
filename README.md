@@ -14,7 +14,7 @@
     * [Multiple buckets](#multiple-buckets)
     * [Job scheduling](#job-scheduling)
     * [Attempts failure](#attempts-failure)
-    * [ZIP compression and encryption](#zip-compression-and-encryption)
+    * [ZIP compression and encryption](zip-compression-and-encryption)
 	* [Generation of Pre-authenticated Requests](#generation-of-pre-authenticated-requests)
     * [Webhook Notification](#webhook-notification)
 	* [Sending email with Sendgrid](#sending-email-with-sendgrid)
@@ -116,7 +116,7 @@ Samples:
 
 Allows you to set execution attempts when a failure occurs during job processing.
 
-### Compression for ZIP and encryption
+### ZIP compression and encryption
 
 Allows every file to be compressed to a ZIP file and encrypted for greater security.
 
