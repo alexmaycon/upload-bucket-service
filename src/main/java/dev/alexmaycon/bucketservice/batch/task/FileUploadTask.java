@@ -187,11 +187,14 @@ public class FileUploadTask implements Tasklet, InitializingBean {
 	    		}
 	    		ZipFile zipFile = null;
 	    		ZipParameters parameters = new ZipParameters();
+	    		final String password = System.getenv("UBS_ZIP_PWD") != null 
+	    				? System.getenv("UBS_ZIP_PWD")
+	    				 : zipConfig.getPassword(); 
 	    		
-	    		if (zipConfig.getPassword() == null) {
+	    		if (password == null) {
 	    			zipFile = new ZipFile(tempZip);
 	    		} else {
-	    			zipFile = new ZipFile(tempZip, zipConfig.getPassword().toCharArray());
+	    			zipFile = new ZipFile(tempZip, password.toCharArray());
 	    			parameters.setEncryptFiles(true);
 	    			parameters.setEncryptionMethod(EncryptionMethod.AES);
 	    			parameters.setAesKeyStrength(AesKeyStrength.KEY_STRENGTH_256);

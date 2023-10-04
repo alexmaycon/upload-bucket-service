@@ -14,8 +14,10 @@
     * [Multiple buckets](#multiple-buckets)
     * [Job scheduling](#job-scheduling)
     * [Attempts failure](#attempts-failure)
-    * [E-mail notification](#e-mail-notification)
-    * [Webhook notification](#webhook-notification)
+    * [ZIP compression and encryption](#zip-compression-and-encryption)
+	* [Generation of Pre-authenticated Requests](#generation-of-pre-authenticated-requests)
+    * [Webhook Notification](#webhook-notification)
+	* [Sending email with Sendgrid](#sending-email-with-sendgrid)
   * [Settings](#settings)
     * [application.properties](#applicationproperties)
   * [About OCI API key (.oci)](#about-oci-api-key-oci)
@@ -114,13 +116,43 @@ Samples:
 
 Allows you to set execution attempts when a failure occurs during job processing.
 
-### E-mail notification
+### Compression for ZIP and encryption
 
-You can configure email sending to receive notifications of job executions, which may contain just the name of the files or also a link to download them.
+Allows every file to be compressed to a ZIP file and encrypted for greater security.
 
-#### Sendgrid
+To enable, simply add to your `application.properties` file:
 
-To configure, simply define the SendGrid API in the `service.email.sendgrid.apiKey` parameter.
+```
+service.zip.enabled= true
+```
+
+If you want to add ZIP encryption using a password:
+
+```
+service.zip.password=Yourpa55w0rd
+```
+
+Or you can define the environment variable `UBS_ZIP_PWD` - it will always have priority when both locations have the password defined.
+
+```bash
+export UBS_ZIP_PWD=Yourpa55w0rd
+```
+
+### Generation of Pre-authenticated Requests
+
+Pre-authenticated requests provide a way to allow users to access a bucket or object without having their own credentials through a URL generated at file upload time.
+
+Requests are created with read permission for the sent file and do not allow writing or listing of other files in the bucket.
+
+**The expiration date of the created request is 6 months.**
+
+To enable, simply add to your `application.properties` file:
+
+```
+service.oci.generatePreauthenticatedUrl=true
+```
+
+When enabled, this URL is sent in the webhook notification and email.
 
 ### Webhook notification
 
@@ -142,12 +174,10 @@ On `details` field, each directory is separated by the '¢' character and the di
 	"details": "DIRECTORY=C:/temp;CRON=0/10 * * * * ?;BUCKET=teste¢DIRECTORY=C:/temp2;CRON=0/10 * * * * ?;BUCKET=teste",
 	"createdTime": "2022-10-12T22:26:05+0000",
 	"endTime": "2022-10-12T22:26:08+0000",
-	"files": [
-	  	{
-	  		"fileName": "xyz.abc",
-	  		"url": "https://...."
-	  	}
-	]
+	"files": [{
+		"fileName": "xyz.zip",
+		"url": "https://..."
+	}],
 	"exceptions": []
 }
 ```
@@ -192,6 +222,32 @@ On `details` field, each directory is separated by the '¢' character and the di
 }
 ```
 
+### Sending email with Sendgrid
+
+If you have a Twilio Sendgrid account for sending emails, you can configure it using your account's API key to enable receiving email notifications.
+
+If the creation of a pre-authenticated request is enabled, the file link will be sent in the email.
+
+To enable email sending, simply add to your `application.properties` file:
+
+```
+service.email.sendgrid.apiKey=paste-your-api-key-here
+service.email.sender=from@email.com
+service.email.recipients[0]=to@email.com
+```
+
+You can configure any recipients you want:
+
+```
+service.email.sendgrid.apiKey=
+service.email.sender=from@email.com
+service.email.recipients[0]=to1@email.com
+service.email.recipients[1]=to2@email.com
+service.email.recipients[2]=to3@email.com
+```
+
+
+
 ## Settings
 
 Installation folder structure:
@@ -219,8 +275,9 @@ root
 | service.attemptsFailure                  | Number of attempts when a failure occurs                                                                | No       | 1                         | int     |
 | service.oci.profile                      | Profile session of .oci configuration                                                                   | No       | "DEFAULT"                 | String  |
 | service.oci.bucket                       | OCI Bucket name                                                                                         | **Yes**  |                           | String  |
-| service.oci.compartmentOcid              | Compartment OCID - if you wanted to create the bucket in a specific compartment.                        | No       |                           | String  |
-| service.oci.generatePreauthenticatedUrl  | Generate Pre-authenticated URL to access the object (sended in hook and e-mail)                         | No       | false                           | boolean |
+| service.oci.generatePreauthenticatedUrl  | Enable/disable creation of pre-authenticated URLs for the object in OCI                                 | No       | false                          | Boolean  |
+| service.oci.compartmentOcid              | Compartment OCID - if you wanted to create the bucket in a specific compartment.                        | No       |                           
+| String  |
 | service.folders[*]                       | Folders configuration                                                                                   | **Yes**  |                           | List    |
 | service.folders[*].jobName               | Job name for current folder                                                                             | No       |                           | String  |
 | service.folders[*].directory             | Folder path (need to include escape character for \ on Windows)                                         | **Yes**  |                           | String  |
@@ -232,6 +289,11 @@ root
 | service.folders[*].oci.bucket            | OCI Bucket name (apply only to folder)                                                                  | No       |                           | String  |
 | service.folders[*].oci.compartmentOcid   | Compartment OCID - if you wanted to create the bucket in a specific compartment. (apply only to folder) | No       |                           | String  |
 | service.folders[*].generatePreauthenticatedUrl  | Generate Pre-authenticated URL to access the object (sended in hook and e-mail).		         | No       | false                           | boolean |
+| service.email.sendgrid.apiKey            | API key for your Twilio Sendgrid account                                                                | No         |                           | String  |
+| service.email.sendgrid.sender            | Sender's email                                                                                          | No         |                           | String  |
+| service.email.sendgrid.recipients[*]     | Recipient email(s)                                                                                      | No         |                           | String  |
+| service.zip.enabled                      | Enable/disable file compression for ZIP                                                                 | No         | false                          | Boolean  |
+| service.zip.password                     | Password for encrypting the ZIP file. You can also set it using the `UBS_ZIP_PWD` environment variable | No         |                           | String  |
 
 ##  About OCI API key (.oci)
 
