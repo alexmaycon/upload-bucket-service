@@ -30,8 +30,14 @@ import com.oracle.bmc.objectstorage.responses.CreatePreauthenticatedRequestRespo
 import com.oracle.bmc.objectstorage.responses.HeadBucketResponse;
 import com.oracle.bmc.objectstorage.responses.HeadObjectResponse;
 
+import dev.alexmaycon.bucketservice.config.model.ZipConfig;
 import dev.alexmaycon.bucketservice.oci.ObjectStorageComponent;
 import dev.alexmaycon.bucketservice.oci.OciAuthComponent;
+import net.lingala.zip4j.ZipFile;
+import net.lingala.zip4j.exception.ZipException;
+import net.lingala.zip4j.model.ZipParameters;
+import net.lingala.zip4j.model.enums.AesKeyStrength;
+import net.lingala.zip4j.model.enums.EncryptionMethod;
 
 public class FileUploadTask implements Tasklet, InitializingBean {
 
@@ -47,6 +53,7 @@ public class FileUploadTask implements Tasklet, InitializingBean {
     private boolean overrideFile = false;
     private boolean createBucketIfNotExists = false;
     private boolean generatePreauthenticatedUrl = false;
+    private ZipConfig zipConfig;
 
     @Override
     public RepeatStatus execute(StepContribution stepContribution, ChunkContext chunkContext) throws Exception {
@@ -87,7 +94,7 @@ public class FileUploadTask implements Tasklet, InitializingBean {
                 logger.info("Started processing file {}.", file.getName());
                 HeadObjectResponse getObjectResponse = null;
                 boolean fileExists = false;
-                final String fullFileName = ObjectStorageComponent.getFullObjectName(bucketDir, file.getName());
+                final String fullFileName = ObjectStorageComponent.getFullObjectName(bucketDir, file.getName().concat(".zip"));
                 try {
                     getObjectResponse = objectStorageComponent.getHeadObject(objectStorage, namespace, bucketName, fullFileName);
                     fileExists = getObjectResponse.get__httpStatusCode__() == 200;
@@ -105,22 +112,26 @@ public class FileUploadTask implements Tasklet, InitializingBean {
                     if (overrideFile) {
                         logger.info("File {} will be overwritten as per the configuration.", fullFileName);
                     }
-
+                    
+                    File finalFile = processFile(file, fullFileName);
+                    if (finalFile == null) {
+                    	throw new RuntimeException("Error on reading file.");
+                    }
+                    
                     InputStream inputStream = null;
                     try {
-                        inputStream = new FileInputStream(file);
+                        inputStream = new FileInputStream(finalFile);
                     } catch (FileNotFoundException e) {
-                        logger.error("File not found '" + file.getPath() + "'.", e.getCause());
+                        logger.error("File not found '" + finalFile.getPath() + "'.", e.getCause());
                     }
-
+                                        
                     if (inputStream != null) {
-
                         String md5 = null;
                         try {
-                            InputStream temp = Files.newInputStream(Paths.get(file.getPath()));
-                            md5 = DigestUtils.md5Hex(temp);
-                            temp.close();
-                        } catch (IOException e) {
+                        	 InputStream temp = Files.newInputStream(Paths.get(finalFile.getPath()));
+                             md5 = DigestUtils.md5Hex(temp);
+                             temp.close();
+                        } catch (Exception e) {
                             throw new RuntimeException(e);
                         }
 
@@ -129,7 +140,7 @@ public class FileUploadTask implements Tasklet, InitializingBean {
                         }
 
                         if (!fileExists || (overrideFile && !md5.equals(getObjectResponse.getOpcMeta().get("file-md5")))) {
-                            final boolean res = objectStorageComponent.uploadFile(objectStorage, namespace, bucketName, fullFileName, file.length(), md5, inputStream);
+                            final boolean res = objectStorageComponent.uploadFile(objectStorage, namespace, bucketName, fullFileName, finalFile.length(), md5, inputStream);
                             if (!res) {
                                 logger.warn("File {} was not uploaded successfully.", fullFileName);
                             } else {
@@ -165,6 +176,41 @@ public class FileUploadTask implements Tasklet, InitializingBean {
         
         logger.info("Finished task for file upload...");
         return RepeatStatus.FINISHED;
+    }
+    
+    private File processFile(File file, String fullFileName) {
+    	try {
+	    	if (zipConfig.isEnabled()) {
+	    		File tempZip = new File(System.getProperty("java.io.tmpdir"), fullFileName);
+	    		if (tempZip.exists()) {
+	    			tempZip.delete();
+	    		}
+	    		ZipFile zipFile = null;
+	    		ZipParameters parameters = new ZipParameters();
+	    		
+	    		if (zipConfig.getPassword() == null) {
+	    			zipFile = new ZipFile(tempZip);
+	    		} else {
+	    			zipFile = new ZipFile(tempZip, zipConfig.getPassword().toCharArray());
+	    			parameters.setEncryptFiles(true);
+	    			parameters.setEncryptionMethod(EncryptionMethod.AES);
+	    			parameters.setAesKeyStrength(AesKeyStrength.KEY_STRENGTH_256);
+	    		}	    		
+	    		
+	            zipFile.addFile(file, parameters);
+	            zipFile.close();
+
+	            logger.info("Generated ZIP file '" + tempZip.getPath() + "'.");
+	            return tempZip;
+	    	} 
+        } catch (FileNotFoundException e) {
+            logger.error("File not found '" + file.getPath() + "'.", e.getCause());
+        } catch (ZipException e) {
+        	logger.error("Error on generating ZIP file '" + file.getPath() + "'.", e.getCause());
+        } catch (IOException e) {
+        	logger.error("Error on processing file '" + file.getPath() + "'.", e.getCause());
+		}
+    	return file;
     }
 
     private void validateAndCreateBucket(ObjectStorageComponent objectStorageComponent, ObjectStorage objectStorage, String compartmentId, String namespace, String bucketName) throws Exception {
@@ -289,5 +335,13 @@ public class FileUploadTask implements Tasklet, InitializingBean {
 
 	public void setGeneratePreauthenticatedUrl(boolean generatePreauthenticatedUrl) {
 		this.generatePreauthenticatedUrl = generatePreauthenticatedUrl;
+	}
+
+	public ZipConfig getZipConfig() {
+		return zipConfig;
+	}
+
+	public void setZipConfig(ZipConfig zipConfig) {
+		this.zipConfig = zipConfig;
 	}
 }

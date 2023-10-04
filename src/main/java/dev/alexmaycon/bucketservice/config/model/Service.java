@@ -33,6 +33,8 @@ public class Service {
     private String hookContentType = MediaType.APPLICATION_JSON;
     
     private EmailConfig email;
+    
+    private ZipConfig zip;
 
     public List<FolderConfig> getFolders() {
         return folders;
@@ -96,6 +98,14 @@ public class Service {
 
 	public void setEmail(EmailConfig email) {
 		this.email = email;
+	}
+
+	public ZipConfig getZip() {
+		return zip;
+	}
+
+	public void setZip(ZipConfig zip) {
+		this.zip = zip;
 	}
 
 	@Override
