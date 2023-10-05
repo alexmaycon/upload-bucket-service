@@ -94,7 +94,7 @@ public class FileUploadTask implements Tasklet, InitializingBean {
                 logger.info("Started processing file {}.", file.getName());
                 HeadObjectResponse getObjectResponse = null;
                 boolean fileExists = false;
-                final String fullFileName = ObjectStorageComponent.getFullObjectName(bucketDir, file.getName().concat(".zip"));
+                final String fullFileName = ObjectStorageComponent.getFullObjectName(bucketDir, zipConfig.isEnabled() ? file.getName().concat(".zip") : file.getName());
                 try {
                     getObjectResponse = objectStorageComponent.getHeadObject(objectStorage, namespace, bucketName, fullFileName);
                     fileExists = getObjectResponse.get__httpStatusCode__() == 200;
@@ -156,6 +156,9 @@ public class FileUploadTask implements Tasklet, InitializingBean {
                         }
                         try {
                             inputStream.close();
+                            if (zipConfig.isEnabled() && finalFile.delete()) {
+                            	logger.info("Temp file {} deleted successfully.", finalFile.getName());
+                            }
                         } catch (IOException e) {
                             throw new RuntimeException(e);
                         }
