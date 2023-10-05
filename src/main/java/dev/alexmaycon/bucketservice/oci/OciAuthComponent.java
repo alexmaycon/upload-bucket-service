@@ -4,7 +4,6 @@ import com.oracle.bmc.ConfigFileReader;
 import com.oracle.bmc.auth.AuthenticationDetailsProvider;
 import com.oracle.bmc.auth.ConfigFileAuthenticationDetailsProvider;
 import org.apache.logging.log4j.util.Strings;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
@@ -20,7 +19,6 @@ public class OciAuthComponent {
 
     private final Environment environment;
 
-    @Autowired
     public OciAuthComponent(Environment environment) {
         this.environment = environment;
     }

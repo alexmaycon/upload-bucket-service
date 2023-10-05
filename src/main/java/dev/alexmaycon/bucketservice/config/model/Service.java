@@ -25,10 +25,16 @@ public class Service {
     @NotBlank
     private String cron;
 
+    private String nameDefaultJob;
+
     @Pattern(regexp = "^(?:^|[ \\t])((https?:\\/\\/)?(?:localhost|[\\w-]+(?:\\.[\\w-]+)+)(:\\d+)?(\\/\\S*)?)$", message = "'service.hook' must me a valid URL.")
     private String hook;
 
     private String hookContentType = MediaType.APPLICATION_JSON;
+    
+    private EmailConfig email;
+    
+    private ZipConfig zip;
 
     public List<FolderConfig> getFolders() {
         return folders;
@@ -78,10 +84,35 @@ public class Service {
         this.hookContentType = hookContentType;
     }
 
-    @Override
+    public String getNameDefaultJob() {
+        return this.nameDefaultJob;
+    }
+
+    public void setNameDefaultJob(String nameDefaultJob) {
+        this.nameDefaultJob = nameDefaultJob;
+    }
+    
+    public EmailConfig getEmail() {
+		return email;
+	}
+
+	public void setEmail(EmailConfig email) {
+		this.email = email;
+	}
+
+	public ZipConfig getZip() {
+		return zip;
+	}
+
+	public void setZip(ZipConfig zip) {
+		this.zip = zip;
+	}
+
+	@Override
     public String toString() {
         return "Service{" +
-                "folders=" + folders +
+                "nameDefaultJob="+nameDefaultJob+
+                ", folders=" + folders +
                 ", attemptsFailure=" + attemptsFailure +
                 ", oci=" + oci +
                 ", cron='" + cron + '\'' +

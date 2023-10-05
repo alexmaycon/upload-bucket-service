@@ -1,14 +1,15 @@
 package dev.alexmaycon.bucketservice.batch.listener;
 
-import dev.alexmaycon.bucketservice.batch.config.JobConfig;
-import dev.alexmaycon.bucketservice.hook.HookClientRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.listener.JobExecutionListenerSupport;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import dev.alexmaycon.bucketservice.batch.config.JobConfig;
+import dev.alexmaycon.bucketservice.email.EmailNotification;
+import dev.alexmaycon.bucketservice.hook.HookClientRequest;
 
 @Component
 public class JobUploadFileListener extends JobExecutionListenerSupport {
@@ -18,15 +19,20 @@ public class JobUploadFileListener extends JobExecutionListenerSupport {
     private final JobConfig jobConfig;
 
     private final HookClientRequest hookClientRequest;
+    private final EmailNotification emailNotification;
 
-    @Autowired
-    public JobUploadFileListener(JobConfig jobConfig, HookClientRequest hookClientRequest) {
+    public JobUploadFileListener(JobConfig jobConfig, HookClientRequest hookClientRequest, EmailNotification emailNotification) {
         this.jobConfig = jobConfig;
         this.hookClientRequest = hookClientRequest;
+        this.emailNotification = emailNotification;
     }
 
     public void sendHook(JobExecution jobExecution){
         hookClientRequest.send(jobConfig.getDirectoriesPerJobConfig(), jobExecution);
+    }
+    
+    public void sendEmail(JobExecution jobExecution) {
+    	emailNotification.send(jobConfig.getDirectoriesPerJobConfig(), jobExecution);
     }
 
     @Override
@@ -37,7 +43,8 @@ public class JobUploadFileListener extends JobExecutionListenerSupport {
     @Override
     public void afterJob(JobExecution jobExecution) {
         sendHook(jobExecution);
-
+        sendEmail(jobExecution);
+        
         if(jobExecution.getStatus() == BatchStatus.COMPLETED) {
             logger.info("Finishing job execution {} with SUCCESS status.'", jobExecution.getJobInstance().getJobName());
         } else if(jobExecution.getStatus() == BatchStatus.FAILED) {

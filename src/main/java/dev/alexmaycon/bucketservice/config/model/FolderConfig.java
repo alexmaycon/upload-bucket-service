@@ -27,6 +27,8 @@ public class FolderConfig {
     private String mapToBucketDir;
 
     private OciConfig oci;
+    
+    private String jobName;
 
     public String getDirectory() {
         return directory;
@@ -74,9 +76,17 @@ public class FolderConfig {
 
     public void setOci(OciConfig oci) {
         this.oci = oci;
-    }
+    }    
 
-    @Override
+    public String getJobName() {
+		return jobName;
+	}
+
+	public void setJobName(String jobName) {
+		this.jobName = jobName;
+	}
+
+	@Override
     public String toString() {
         return "FolderConfig{" +
                 "enabled=" + enabled +
@@ -85,6 +95,7 @@ public class FolderConfig {
                 ", overwriteExistingFile=" + overwriteExistingFile +
                 ", mapToBucketDir='" + mapToBucketDir + '\'' +
                 ", oci=" + oci +
+                ", jobName="+jobName+
                 '}';
     }
 

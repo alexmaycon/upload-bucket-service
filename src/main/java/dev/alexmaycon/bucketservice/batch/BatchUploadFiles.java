@@ -21,7 +21,6 @@ import org.springframework.batch.core.job.flow.Flow;
 import org.springframework.batch.core.job.flow.support.SimpleFlow;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.step.builder.StepBuilder;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.FileUrlResource;
@@ -64,8 +63,6 @@ public class BatchUploadFiles {
 
     private final JobExplorer jobExplorer;
 
-
-    @Autowired
     public BatchUploadFiles(JobBuilderFactory jobBuilderFactory, StepBuilderFactory stepBuilderFactory, JobUploadFileListener listener, ServiceConfiguration configuration, TaskScheduler taskScheduler, JobLauncher jobLauncher, JobConfig jobConfig,  OciAuthComponent ociAuthComponent, JobExplorer jobExplorer) {
 
         this.jobBuilderFactory = jobBuilderFactory;
@@ -98,6 +95,8 @@ public class BatchUploadFiles {
         fileUploadTask.setObjectStorageComponent(new ObjectStorageComponent(configuration));
         fileUploadTask.setOverrideFile(folderConfig.isOverwriteExistingFile());
         fileUploadTask.setBucketDir(folderConfig.getMapToBucketDir());
+        fileUploadTask.setGeneratePreauthenticatedUrl(oci.isGeneratePreauthenticatedUrl());
+        fileUploadTask.setZipConfig(configuration.getService().getZip());
 
         final String cron = (folderConfig.getCron() == null ? configuration.getService().getCron() :folderConfig.getCron());
 
@@ -156,7 +155,7 @@ public class BatchUploadFiles {
                     }
                 }).collect(Collectors.toList());
 
-        Assert.notEmpty(steps, "No steps were created for the job " + JOB_NAME);
+        Assert.notEmpty(steps, "No steps were created for the job " + getDefaultJobName());
 
         return steps.stream()
                 .map(step -> new FlowBuilder<SimpleFlow>("flow_".concat(step.getName()))
@@ -167,15 +166,15 @@ public class BatchUploadFiles {
 
 
     @Bean
-    public Job job() {
-        logger.info("Creating job {} with default cron {}.", JOB_NAME, configuration.getService().getCron());
-        List<Flow> flows = flows(JOB_NAME);
+    protected Job job() {
+        logger.info("Creating job {} with default cron {}.", getDefaultJobName(), configuration.getService().getCron());
+        List<Flow> flows = flows(getDefaultJobName());
         Flow flow = splitFlow(flows);
-        return this.jobBuilderFactory.get(JOB_NAME).listener(listener).start(flow).build().build();
+        return this.jobBuilderFactory.get(getDefaultJobName()).listener(listener).start(flow).build().build();
     }
 
     @Bean
-    public void createSeperatedCronJobs() {
+    protected void createSeperatedCronJobs() {
         final List<FolderConfig> listCleared = new ArrayList<>(
                 new LinkedHashSet<>(new ArrayList<>(configuration.getService().getFolders())));
 
@@ -184,9 +183,12 @@ public class BatchUploadFiles {
                 .forEach(dir -> {
                     File file = new File(dir.getDirectory());
                     try {
+                    	
                         FileUrlResource fileUrlResource = new FileUrlResource(dir.getDirectory());
                         String dirName = fileUrlResource.getFile().getName().toUpperCase().concat("_" + UUID.randomUUID().toString().toUpperCase());
-                        String jobName = "JOB_CUSTOM_CRON_DIR_".concat(dirName);
+                        String jobName = dir.getJobName() == null 
+                        		? "JOB_DIR_".concat(dirName)
+                        		: dir.getJobName();
                         Step step = createStep(jobName, "STEP_CUSTOM_CRON_".concat(file.getName()), dir);
 
                         Job job = this.jobBuilderFactory.get(jobName).listener(listener).start(step).build();
@@ -221,6 +223,10 @@ public class BatchUploadFiles {
     public TaskExecutor taskExecutor() {
         //taskExecutor.setConcurrencyLimit(2);
         return new SimpleAsyncTaskExecutor("batch_upload_files");
+    }
+
+    private String getDefaultJobName() {
+        return configuration.getService().getNameDefaultJob() == null ? JOB_NAME : configuration.getService().getNameDefaultJob().toUpperCase();
     }
 
 }

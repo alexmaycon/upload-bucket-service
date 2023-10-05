@@ -2,11 +2,9 @@ package dev.alexmaycon.bucketservice.hook;
 
 import dev.alexmaycon.bucketservice.config.ServiceConfiguration;
 import dev.alexmaycon.bucketservice.hook.model.Hook;
-import org.glassfish.jersey.client.ClientConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.JobExecution;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.ws.rs.client.Client;
@@ -22,7 +20,6 @@ public class HookClientRequest {
     private static final Logger logger = LoggerFactory.getLogger(HookClientRequest.class);
     private final ServiceConfiguration serviceConfiguration;
 
-    @Autowired
     public HookClientRequest(ServiceConfiguration serviceConfiguration) {
         this.serviceConfiguration = serviceConfiguration;
     }
@@ -36,18 +33,18 @@ public class HookClientRequest {
 
             final String contentType = serviceConfiguration.getService().getHookContentType();
 
-            ClientConfig config = new ClientConfig();
-
-            Client client = ClientBuilder.newClient(config);
+            Client client = ClientBuilder.newClient();
 
             WebTarget target = client.target(hook);
-
+            
+        	HashMap<String, String> files = (HashMap<String, String>) jobExecution.getExecutionContext().get("MapFiles");
+        	
             String details = directoriesPerJobConfig.get(jobExecution.getJobInstance().getJobName());
 
             Response response = target
                     .request()
                     .accept(contentType)
-                    .post(Entity.entity(Hook.parseJobExecution(jobExecution, details), contentType), Response.class);
+                    .post(Entity.entity(Hook.parseJobExecution(jobExecution, details, files), contentType), Response.class);
 
             if (response.getStatus() == 200) {
                 logger.info("Job {} hook notification as sent successfully.", jobExecution.getJobInstance().getJobName());

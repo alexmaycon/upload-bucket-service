@@ -21,6 +21,8 @@ class ServiceConfigurationTests {
 	void testePropriedade() {
 		Assert.assertNotNull(serviceConfiguration);
 		Assert.assertNotNull(serviceConfiguration.getService());
+		Assert.assertNotNull(serviceConfiguration.getService().getNameDefaultJob());
+		Assert.assertEquals(serviceConfiguration.getService().getNameDefaultJob(), "Teste");
 		Assert.assertEquals(serviceConfiguration.getService().getFolders().size(), 1);
 		System.out.println(serviceConfiguration.toString());
 	}

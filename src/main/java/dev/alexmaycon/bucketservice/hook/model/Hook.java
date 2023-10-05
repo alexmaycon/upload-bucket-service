@@ -6,7 +6,9 @@ import org.springframework.batch.core.JobExecution;
 
 import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -23,6 +25,7 @@ public class Hook implements Serializable {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssZ", timezone = "GMT")
     private Date endTime;
     private List<Exception> exceptions;
+    private List<HookFile> files;
 
     public String getJobName() {
         return jobName;
@@ -72,8 +75,16 @@ public class Hook implements Serializable {
         this.details = details;
     }
 
-    @JsonIgnore
-    public static Hook parseJobExecution(JobExecution jobExecution, String details) {
+    public List<HookFile> getFiles() {
+		return files;
+	}
+
+	public void setFiles(List<HookFile> files) {
+		this.files = files;
+	}
+
+	@JsonIgnore
+    public static Hook parseJobExecution(JobExecution jobExecution, String details, HashMap<String, String> files) {
         Hook hook = new Hook();
         hook.setJobName(jobExecution.getJobInstance().getJobName());
         hook.setJobStatus(jobExecution.getStatus().toString());
@@ -81,6 +92,11 @@ public class Hook implements Serializable {
         hook.setCreatedTime(jobExecution.getCreateTime());
         hook.setEndTime(jobExecution.getEndTime());
         hook.setExceptions(jobExecution.getAllFailureExceptions().stream().map(throwable -> new Exception(throwable.getMessage())).collect(Collectors.toList()));
+        if (files != null) {
+        	List<HookFile> hookFiles = new ArrayList<>();
+        	files.forEach((k,v) -> hookFiles.add(new HookFile(k, v)));
+        	hook.setFiles(hookFiles);
+        }
         return hook;
     }
 }
