@@ -3,13 +3,21 @@ package dev.alexmaycon.bucketservice.batch.task;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.attribute.FileTime;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.slf4j.Logger;
@@ -54,6 +62,8 @@ public class FileUploadTask implements Tasklet, InitializingBean {
     private boolean createBucketIfNotExists = false;
     private boolean generatePreauthenticatedUrl = false;
     private ZipConfig zipConfig;
+    private Integer deleteFileAfter;
+    private String filenameExtensionFilter;
 
     @Override
     public RepeatStatus execute(StepContribution stepContribution, ChunkContext chunkContext) throws Exception {
@@ -70,7 +80,26 @@ public class FileUploadTask implements Tasklet, InitializingBean {
         if (directory == null || !directory.exists()) {
             logger.warn("No valid directory has been reported.");
         }
+        
+        if (filenameExtensionFilter != null) {
+        	logger.info("Using filter  '{}' on files search.", filenameExtensionFilter);
+    	}
 
+        FilenameFilter filenameFilter = new FilenameFilter() {
+            public boolean accept(File dir, String name) {
+            	
+            	if (filenameExtensionFilter == null || filenameExtensionFilter.isEmpty()) {
+            		return true;
+            	}
+            	
+            	List<String> extensions = Arrays.stream(filenameExtensionFilter.split(";"))
+                        .map(str -> str.trim())
+                        .collect(Collectors.toList());
+            	
+            	return extensions.stream().anyMatch(extension -> name.toLowerCase().endsWith(extension));
+            }
+        };
+        
         File dir = null;
         try {
             dir = directory.getFile();
@@ -90,7 +119,7 @@ public class FileUploadTask implements Tasklet, InitializingBean {
             // If 'compartmentOcid' is null then use 'tenancyOcid' (root compartment), otherwise use 'compartmentOcid'
             validateAndCreateBucket(objectStorageComponent, objectStorage, (compartmentOcid == null ? tenancyOcid : compartmentOcid), namespace, bucketName);
 
-            Arrays.asList(dir.listFiles()).forEach(file -> {
+            Arrays.asList(dir.listFiles(filenameFilter)).forEach(file -> {
                 logger.info("Started processing file {}.", file.getName());
                 HeadObjectResponse getObjectResponse = null;
                 boolean fileExists = false;
@@ -134,12 +163,12 @@ public class FileUploadTask implements Tasklet, InitializingBean {
                         } catch (Exception e) {
                             throw new RuntimeException(e);
                         }
-
-                        if (fileExists && overrideFile && md5.equals(getObjectResponse.getOpcMeta().get("file-md5"))) {
-                            logger.info("File {} was ignored because was not modified.", file.getName());
-                        }
-
-                        if (!fileExists || (overrideFile && !md5.equals(getObjectResponse.getOpcMeta().get("file-md5")))) {
+                        
+                        final String ociFileHash = getObjectResponse != null && getObjectResponse.getOpcMeta() != null 
+                        		? getObjectResponse.getOpcMeta().get("file-md5") : null;
+                        final boolean isOciFileModified = ociFileHash != null && !md5.equals(ociFileHash);
+                        
+                        if (!fileExists || (overrideFile && isOciFileModified)) {
                             final boolean res = objectStorageComponent.uploadFile(objectStorage, namespace, bucketName, fullFileName, finalFile.length(), md5, inputStream);
                             if (!res) {
                                 logger.warn("File {} was not uploaded successfully.", fullFileName);
@@ -154,16 +183,36 @@ public class FileUploadTask implements Tasklet, InitializingBean {
                             } else
                             	pars.put(fullFileName, null);
                         }
+                        
                         try {
-                            inputStream.close();
+                        	inputStream.close();
+                        	
                             if (zipConfig.isEnabled() && finalFile.delete()) {
                             	logger.info("Temp file {} deleted successfully.", finalFile.getName());
                             }
+                            
+	                        if (fileExists && overrideFile) {
+	                            if (!isOciFileModified) {
+	                            	logger.info("File {} was ignored because was not modified.", file.getName());
+	                            }
+	                        }
                         } catch (IOException e) {
-                            throw new RuntimeException(e);
-                        }
+                        	throw new RuntimeException(e);
+						}
                     }
                 }
+                
+                try {                    
+                    if (fileExists) {
+						if (deleteFileAfter != null 
+								&& getDaysDifBetween(file.toPath()) >= deleteFileAfter 
+								&& file.delete()) {
+							logger.info("File {} was deleted because parameter \"deleteFileAfter\" was result true." , file.getName());
+						}
+                    }
+                } catch (IOException e) {
+                	logger.error("Error on deleting file '" + file.getPath() + "'.", e.getCause());
+				}
                 logger.info("Finished processing file {} as {}.", fullFileName, new Date());
             });
             logger.info("Finishing file scan in directory '{}'.", dir.getPath());
@@ -190,9 +239,7 @@ public class FileUploadTask implements Tasklet, InitializingBean {
 	    		}
 	    		ZipFile zipFile = null;
 	    		ZipParameters parameters = new ZipParameters();
-	    		final String password = System.getenv("UBS_ZIP_PWD") != null 
-	    				? System.getenv("UBS_ZIP_PWD")
-	    				 : zipConfig.getPassword(); 
+	    		final String password = zipConfig.getPassword(); 
 	    		
 	    		if (password == null) {
 	    			zipFile = new ZipFile(tempZip);
@@ -350,4 +397,27 @@ public class FileUploadTask implements Tasklet, InitializingBean {
 	public void setZipConfig(ZipConfig zipConfig) {
 		this.zipConfig = zipConfig;
 	}
+
+	public Integer getDeleteFileAfter() {
+		return deleteFileAfter;
+	}
+
+	public void setDeleteFileAfter(Integer deleteFileAfter) {
+		this.deleteFileAfter = deleteFileAfter;
+	}
+	
+	public String getFilenameExtensionFilter() {
+		return filenameExtensionFilter;
+	}
+
+	public void setFilenameExtensionFilter(String filenameExtensionFilter) {
+		this.filenameExtensionFilter = filenameExtensionFilter;
+	}
+
+	private Integer getDaysDifBetween(Path path) throws IOException {
+        FileTime fileTime = Files.getLastModifiedTime(path);
+        LocalDateTime modifiedLastDate = LocalDateTime.ofInstant(fileTime.toInstant(), ZoneId.systemDefault());
+        LocalDateTime now = LocalDateTime.now();
+        return Long.valueOf(ChronoUnit.DAYS.between(modifiedLastDate, now)).intValue();
+    }
 }

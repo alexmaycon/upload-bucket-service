@@ -274,11 +274,14 @@ root
 | service.folders[*].oci.profile           | Sessão de perfil de configuração .oci (aplica-se apenas à pasta)                                            | Não         | "DEFAULT"                 | String  |
 | service.folders[*].oci.bucket            | Nome do bucket OCI (aplica-se apenas à pasta)                                                               | Não         |                           | String  |
 | service.folders[*].oci.compartmentOcid   | Compartment OCID - se você quiser criar o bucket em um compartimento específico. (aplica-se apenas à pasta) | Não         |                           | String  |
+| service.folders[*].generatePreauthenticatedUrl  | Gerar URL pré-autenticada para acessar o objeto (enviada por e-mail)		         | No       | false                           | boolean |
+| service.folders[*].deleteFileAfter 	   | Excluir o arquivo após o valor definido, em dias                                                        | No       |                           | Integer  | 
+| service.folders[*].filenameExtensionFilter | Definir filtro para extensões de arquivo, separadas por ponto e vírgula (.sql;.txt;.xml)								 | No       |                           | String  |
 | service.email.sendgrid.apiKey            | Chave API de sua conta no Twilio Sendgrid                                                                   | Não         |                           | String  |
 | service.email.sendgrid.sender            | E-mail do remetente                                                                                         | Não         |                           | String  |
 | service.email.sendgrid.recipients[*]     | E-mail(s) do destinatário                                                                                   | Não         |                           | String  |
 | service.zip.enabled                      | Ativar/desativar a compactação do arquivo para ZIP                                                          | Não         | false                          | Boolean  |
-| service.zip.password                     | Senha para encriptação do arquivo ZIP. Você também pode definir usando a variávle de ambiente `UBS_ZIP_PWD` | Não         |                           | String  |
+| service.zip.password                     | Senha para encriptação do arquivo ZIP (Min=8;Max=200). Você também pode definir usando a variávle de ambiente `UBS_ZIP_PWD` | Não         |                           | String  |
 
 
 ##  Sobre a chave da API OCI (.oci)
@@ -310,16 +313,21 @@ service.folders[0].cron=0 0/10 * * * ?
 service.folders[1].directory=C:/temp2
 service.folders[1].overwriteExistingFile=false
 service.folders[1].enabled=true
+service.folders[1].filenameExtensionFilter=.sql;.txt
 service.folders[2].directory=C:/temp3
 service.folders[2].overwriteExistingFile=false
 service.folders[2].enabled=true
+service.folders[2].filenameExtensionFilter=.sql
 service.folders[3].directory=C:/temp4
 service.folders[3].overwriteExistingFile=false
 service.folders[3].enabled=true
 service.folders[4].directory=C:/temp4
 service.folders[4].overwriteExistingFile=false
 service.folders[4].enabled=true
+service.folders[4].deleteFileAfter=3
 service.attemptsFailure=5
+service.zip.enabled= true
+service.zip.password=P@WD4T3ST
 ```
 
 ## Construindo

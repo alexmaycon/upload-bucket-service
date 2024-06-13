@@ -96,7 +96,16 @@ public class BatchUploadFiles {
         fileUploadTask.setOverrideFile(folderConfig.isOverwriteExistingFile());
         fileUploadTask.setBucketDir(folderConfig.getMapToBucketDir());
         fileUploadTask.setGeneratePreauthenticatedUrl(oci.isGeneratePreauthenticatedUrl());
+        
+        if (configuration.getService().getZip() != null 
+        		&& configuration.getService().getZip().isEnabled() 
+        		&& System.getenv("UBS_ZIP_PWD") != null) {
+        	configuration.getService().getZip().setPassword(System.getenv("UBS_ZIP_PWD"));
+        }
+
         fileUploadTask.setZipConfig(configuration.getService().getZip());
+        fileUploadTask.setDeleteFileAfter(folderConfig.getDeleteFileAfter());
+        fileUploadTask.setFilenameExtensionFilter(folderConfig.getFilenameExtensionFilter());
 
         final String cron = (folderConfig.getCron() == null ? configuration.getService().getCron() :folderConfig.getCron());
 
