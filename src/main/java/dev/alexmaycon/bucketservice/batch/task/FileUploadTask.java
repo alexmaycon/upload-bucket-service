@@ -93,7 +93,7 @@ public class FileUploadTask implements Tasklet, InitializingBean {
             	}
             	
             	List<String> extensions = Arrays.stream(filenameExtensionFilter.split(";"))
-                        .map(str -> str.trim())
+                        .map(str -> str.trim().toLowerCase())
                         .collect(Collectors.toList());
             	
             	return extensions.stream().anyMatch(extension -> name.toLowerCase().endsWith(extension));
@@ -131,18 +131,28 @@ public class FileUploadTask implements Tasklet, InitializingBean {
                     if (e.getStatusCode() == 404) {
                         fileExists = false;
                     }
-                }
+                }                
+                
+                String md5 = generateMd5(file);
+                
+                final String ociFileHash = getObjectResponse != null && getObjectResponse.getOpcMeta() != null 
+                		? getObjectResponse.getOpcMeta().get("file-md5") : null;
 
+                final boolean isOciFileModified = ociFileHash != null && !md5.equals(ociFileHash);
+                
                 if (!overrideFile && fileExists) {
                     logger.info("File {} will be ignored as the configuration does not allow file overwriting.", fullFileName);
+                } else if (overrideFile && !isOciFileModified && fileExists) {
+                	logger.info("File {} was ignored because was not modified.", file.getName());
                 }
 
-                if (overrideFile || !fileExists) {
-                    if (overrideFile) {
+                if ((overrideFile && isOciFileModified) || !fileExists) {
+                    if (overrideFile && fileExists) {
                         logger.info("File {} will be overwritten as per the configuration.", fullFileName);
-                    }
+                    } 
                     
                     File finalFile = processFile(file, fullFileName);
+                    
                     if (finalFile == null) {
                     	throw new RuntimeException("Error on reading file.");
                     }
@@ -153,20 +163,7 @@ public class FileUploadTask implements Tasklet, InitializingBean {
                     } catch (FileNotFoundException e) {
                         logger.error("File not found '" + finalFile.getPath() + "'.", e.getCause());
                     }
-                                        
                     if (inputStream != null) {
-                        String md5 = null;
-                        try {
-                        	 InputStream temp = Files.newInputStream(Paths.get(finalFile.getPath()));
-                             md5 = DigestUtils.md5Hex(temp);
-                             temp.close();
-                        } catch (Exception e) {
-                            throw new RuntimeException(e);
-                        }
-                        
-                        final String ociFileHash = getObjectResponse != null && getObjectResponse.getOpcMeta() != null 
-                        		? getObjectResponse.getOpcMeta().get("file-md5") : null;
-                        final boolean isOciFileModified = ociFileHash != null && !md5.equals(ociFileHash);
                         
                         if (!fileExists || (overrideFile && isOciFileModified)) {
                             final boolean res = objectStorageComponent.uploadFile(objectStorage, namespace, bucketName, fullFileName, finalFile.length(), md5, inputStream);
@@ -190,12 +187,6 @@ public class FileUploadTask implements Tasklet, InitializingBean {
                             if (zipConfig.isEnabled() && finalFile.delete()) {
                             	logger.info("Temp file {} deleted successfully.", finalFile.getName());
                             }
-                            
-	                        if (fileExists && overrideFile) {
-	                            if (!isOciFileModified) {
-	                            	logger.info("File {} was ignored because was not modified.", file.getName());
-	                            }
-	                        }
                         } catch (IOException e) {
                         	throw new RuntimeException(e);
 						}
@@ -252,7 +243,7 @@ public class FileUploadTask implements Tasklet, InitializingBean {
 	    		
 	            zipFile.addFile(file, parameters);
 	            zipFile.close();
-
+	            
 	            logger.info("Generated ZIP file '" + tempZip.getPath() + "'.");
 	            return tempZip;
 	    	} 
@@ -420,4 +411,16 @@ public class FileUploadTask implements Tasklet, InitializingBean {
         LocalDateTime now = LocalDateTime.now();
         return Long.valueOf(ChronoUnit.DAYS.between(modifiedLastDate, now)).intValue();
     }
+	
+	private String generateMd5(final File file) {
+		String md5 = null;
+        try {
+        	 InputStream temp = Files.newInputStream(Paths.get(file.getPath()));
+             md5 = DigestUtils.md5Hex(temp);
+             temp.close();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return md5;
+	}
 }
