@@ -1,8 +1,11 @@
 package dev.alexmaycon.bucketservice.config.model;
 
+import javax.validation.constraints.Size;
+
 public class ZipConfig {
 	
 	private boolean enabled;
+	@Size(min = 8, max=200, message = "The password length must be between 8 and 200 characters.")
 	private String password;
 	
 	public ZipConfig() {

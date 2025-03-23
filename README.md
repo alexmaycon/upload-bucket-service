@@ -289,11 +289,13 @@ root
 | service.folders[*].oci.bucket            | OCI Bucket name (apply only to folder)                                                                  | No       |                           | String  |
 | service.folders[*].oci.compartmentOcid   | Compartment OCID - if you wanted to create the bucket in a specific compartment. (apply only to folder) | No       |                           | String  |
 | service.folders[*].generatePreauthenticatedUrl  | Generate Pre-authenticated URL to access the object (sended in hook and e-mail).		         | No       | false                           | boolean |
+| service.folders[*].deleteFileAfter 	   | Delete the file after the defined value, in days                                                        | No       |                           | Integer  | 
+| service.folders[*].filenameExtensionFilter | Set filter for file extensions, separated by semicolon (.sql;.txt;.xml)								 | No       |                           | String  |
 | service.email.sendgrid.apiKey            | API key for your Twilio Sendgrid account                                                                | No         |                           | String  |
 | service.email.sendgrid.sender            | Sender's email                                                                                          | No         |                           | String  |
 | service.email.sendgrid.recipients[*]     | Recipient email(s)                                                                                      | No         |                           | String  |
 | service.zip.enabled                      | Enable/disable file compression for ZIP                                                                 | No         | false                          | Boolean  |
-| service.zip.password                     | Password for encrypting the ZIP file. You can also set it using the `UBS_ZIP_PWD` environment variable | No         |                           | String  |
+| service.zip.password                     | Password for encrypting the ZIP file (Min=8;Max=200). You can also set it using the `UBS_ZIP_PWD` environment variable | No         |                           | String  |
 
 ##  About OCI API key (.oci)
 
@@ -324,16 +326,21 @@ service.folders[0].cron=0 0/10 * * * ?
 service.folders[1].directory=C:/temp2
 service.folders[1].overwriteExistingFile=false
 service.folders[1].enabled=true
+service.folders[1].filenameExtensionFilter=.sql;.txt
 service.folders[2].directory=C:/temp3
 service.folders[2].overwriteExistingFile=false
 service.folders[2].enabled=true
+service.folders[2].filenameExtensionFilter=.sql
 service.folders[3].directory=C:/temp4
 service.folders[3].overwriteExistingFile=false
 service.folders[3].enabled=true
 service.folders[4].directory=C:/temp4
 service.folders[4].overwriteExistingFile=false
 service.folders[4].enabled=true
+service.folders[4].deleteFileAfter=3
 service.attemptsFailure=5
+service.zip.enabled= true
+service.zip.password=P@WD4T3ST
 ```
 
 ## Building

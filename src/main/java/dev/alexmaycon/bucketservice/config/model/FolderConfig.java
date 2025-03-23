@@ -29,8 +29,12 @@ public class FolderConfig {
     private OciConfig oci;
     
     private String jobName;
-
-    public String getDirectory() {
+    
+    private Integer deleteFileAfter;
+    
+    private String filenameExtensionFilter;
+    
+	public String getDirectory() {
         return directory;
     }
 
@@ -86,6 +90,14 @@ public class FolderConfig {
 		this.jobName = jobName;
 	}
 
+    public Integer getDeleteFileAfter() {
+		return deleteFileAfter;
+	}
+
+	public void setDeleteFileAfter(Integer deleteFileAfter) {
+		this.deleteFileAfter = deleteFileAfter;
+	}
+
 	@Override
     public String toString() {
         return "FolderConfig{" +
@@ -116,4 +128,12 @@ public class FolderConfig {
         final File dir = new File(this.directory);
         return dir.isDirectory() && dir.exists();
     }
+
+	public String getFilenameExtensionFilter() {
+		return filenameExtensionFilter;
+	}
+
+	public void setFilenameExtensionFilter(String filenameExtensionFilter) {
+		this.filenameExtensionFilter = filenameExtensionFilter;
+	}
 }

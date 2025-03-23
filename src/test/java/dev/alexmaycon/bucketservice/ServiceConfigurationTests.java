@@ -11,7 +11,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 @ExtendWith(SpringExtension.class)
 @EnableConfigurationProperties(value = ServiceConfiguration.class)
-@TestPropertySource("classpath:application.properties")
+@TestPropertySource("classpath:application-test.properties")
 class ServiceConfigurationTests {
 
 	@Autowired

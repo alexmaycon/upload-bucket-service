@@ -40,7 +40,9 @@ public class ObjectStorageComponent {
 
 	private RetryConfiguration retryConfiguration() {
 		DefaultRetryCondition defaultRetryCondition = new DefaultRetryCondition();
-		return RetryConfiguration.builder().retryCondition(defaultRetryCondition)
+		return RetryConfiguration
+				.builder()
+				.retryCondition(defaultRetryCondition)
 				.retryOptions(new RetryOptions(serviceConfiguration.getService().getAttemptsFailure())).build();
 	}
 
@@ -51,7 +53,9 @@ public class ObjectStorageComponent {
 			throw new Exception("Region not informed in the configuration file.");
 		}
 
-		ObjectStorage client = ObjectStorageClient.builder().region(Region.fromRegionId(regionId)).build(provider);
+		ObjectStorage client = ObjectStorageClient
+				.builder()
+				.region(Region.fromRegionId(regionId)).build(provider);
 		
 		return client;
 	}
